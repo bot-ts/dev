@@ -1,0 +1,42 @@
+{
+  "name": "@ghom/orm",
+  "version": "2.1.2",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "description": "TypeScript KnexJS ORM & handler",
+  "homepage": "https://github.com/GhomKrosmonaute/orm",
+  "scripts": {
+    "format": "biome format --write .",
+    "check": "biome check --write . && tsc --noEmit",
+    "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "test": "bun test",
+    "prepublishOnly": "npm run check && npm run build && npm test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.13",
+    "@types/bun": "^1.1.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.2.2"
+  },
+  "optionalDependencies": {
+    "mysql2": "^3.6.2",
+    "pg": "^8.11.3",
+    "sqlite3": "^5.1.6"
+  },
+  "dependencies": {
+    "@ghom/handler": "^3.1.0",
+    "@ghom/query": "1.0.0",
+    "csv-parser": "^3.0.0",
+    "json-2-csv": "^5.5.6",
+    "knex": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "repository": {
+    "url": "https://github.com/GhomKrosmonaute/orm.git",
+    "type": "git"
+  }
+}
