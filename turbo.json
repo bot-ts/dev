@@ -5,18 +5,16 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "bin/**", ".next/**", "!.next/cache/**"]
     },
-    "dev": {
+    "start": {
+      "dependsOn": ["build"],
       "cache": false,
       "persistent": true
     },
-    "lint": {
-      "dependsOn": ["^build"]
-    },
-    "typecheck": {
-      "dependsOn": ["^build"]
-    },
     "format": {
       "cache": false
+    },
+    "test": {
+      "dependsOn": ["build"]
     }
   }
 }
