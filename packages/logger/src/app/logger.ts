@@ -18,20 +18,20 @@ export type LoggerPattern = (
     level: LoggerLevels
     colors: LoggerColors
   },
-  secondaryText?: string
+  secondaryText?: string,
 ) => string
 export type LoggerRender = (out: any) => any
 export type LoggerRenders = Record<LoggerLevels, LoggerRender>
 
 export function loggerLevelName(level: LoggerLevels): LoggerLevel {
   return Object.keys(LoggerLevels).find(
-    (key) => LoggerLevels[key as LoggerLevel] === level
+    (key) => LoggerLevels[key as LoggerLevel] === level,
   ) as LoggerLevel
 }
 
 export function formatLoggerLevelName(levelName: LoggerLevel): string {
   const maxLength = Math.max(
-    ...Object.keys(LoggerLevels).map((key) => key.length)
+    ...Object.keys(LoggerLevels).map((key) => key.length),
   )
 
   return levelName.padStart(maxLength, " ")
@@ -40,13 +40,13 @@ export function formatLoggerLevelName(levelName: LoggerLevel): string {
 export const defaultLoggerPattern: LoggerPattern = (
   text,
   config,
-  secondaryText
+  secondaryText,
 ) => {
   return `${chalk.grey(dayjs().format("DD/MM/YY HH:mm"))} ${chalk.hex(
-    config.colors[config.level]
+    config.colors[config.level],
   )(formatLoggerLevelName(loggerLevelName(config.level)))}${
     secondaryText
-      ? " " + chalk.hex(config.colors.secondaryText)(`${secondaryText}`)
+      ? ` ${chalk.hex(config.colors.secondaryText)(`${secondaryText}`)}`
       : ""
   } ${text}`
 }
@@ -91,8 +91,8 @@ export class Logger {
       this.pattern(
         text,
         { level: LoggerLevels.INFO, colors: this.colors },
-        this.section
-      )
+        this.section,
+      ),
     )
   }
 
@@ -100,14 +100,14 @@ export class Logger {
     this: this,
     text: string | Error,
     _path?: string,
-    full?: boolean
+    full?: boolean,
   ) {
     this.renders[LoggerLevels.ERROR](
       this.pattern(
         text instanceof Error ? text.message : text,
         { level: LoggerLevels.ERROR, colors: this.colors },
-        _path ?? this.section
-      )
+        _path ?? this.section,
+      ),
     )
 
     if (full && text instanceof Error) this.renders[LoggerLevels.ERROR](text)
@@ -118,8 +118,8 @@ export class Logger {
       this.pattern(
         text,
         { level: LoggerLevels.WARN, colors: this.colors },
-        this.section
-      )
+        this.section,
+      ),
     )
   }
 
@@ -128,8 +128,8 @@ export class Logger {
       this.pattern(
         text,
         { level: LoggerLevels.SUCCESS, colors: this.colors },
-        this.section
-      )
+        this.section,
+      ),
     )
   }
 }

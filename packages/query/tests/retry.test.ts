@@ -1,12 +1,12 @@
-import { describe, test, expect } from "bun:test"
-import {
-  RetryHandler,
-  exponentialBackoff,
-  linearBackoff,
-  jitteredBackoff,
-  isRetryableError,
-} from "../src/app/retry"
+import { describe, expect, test } from "bun:test"
 import { MaxRetriesExceededError } from "../src/app/errors"
+import {
+  exponentialBackoff,
+  isRetryableError,
+  jitteredBackoff,
+  linearBackoff,
+  RetryHandler,
+} from "../src/app/retry"
 
 describe("RetryHandler", () => {
   test("should succeed on first try", async () => {
@@ -16,7 +16,7 @@ describe("RetryHandler", () => {
         attempts++
         return "success"
       },
-      { attempts: 3 }
+      { attempts: 3 },
     )
 
     const result = await retry.execute()
@@ -32,7 +32,7 @@ describe("RetryHandler", () => {
         if (attempts < 3) throw new Error("fail")
         return "success"
       },
-      { attempts: 3, delay: 10 }
+      { attempts: 3, delay: 10 },
     )
 
     const result = await retry.execute()
@@ -47,7 +47,7 @@ describe("RetryHandler", () => {
         attempts++
         throw new Error("always fails")
       },
-      { attempts: 3, delay: 10 }
+      { attempts: 3, delay: 10 },
     )
 
     try {
@@ -71,7 +71,7 @@ describe("RetryHandler", () => {
         attempts: 3,
         delay: 10,
         retryIf: (error) => (error as Error).message !== "non-retryable",
-      }
+      },
     )
 
     try {
@@ -91,7 +91,7 @@ describe("RetryHandler", () => {
         if (attempts < 3) throw new Error("fail")
         return "success"
       },
-      { attempts: 3, delay: 50 }
+      { attempts: 3, delay: 50 },
     )
 
     await retry.execute()
@@ -118,7 +118,7 @@ describe("RetryHandler", () => {
           delays.push(d)
           return d
         },
-      }
+      },
     )
 
     await retry.execute()
@@ -135,7 +135,7 @@ describe("RetryHandler", () => {
         if (attempts < 3) throw new Error("fail")
         return "success"
       },
-      { attempts: 3, delay: 10 }
+      { attempts: 3, delay: 10 },
     )
 
     await retry.executeWithCallback([], (attempt, _error, delay) => {

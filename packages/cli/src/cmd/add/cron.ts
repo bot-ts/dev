@@ -1,10 +1,10 @@
-import { capitalize, cwd, format, inputName, isBotTsProject } from "#src/util"
-import { input, select } from "@inquirer/prompts"
-import { Command } from "commander"
-import ejs from "ejs"
 import fs from "node:fs"
 import path from "node:path"
 import { styleText } from "node:util"
+import { input, select } from "@inquirer/prompts"
+import { Command } from "commander"
+import ejs from "ejs"
+import { capitalize, cwd, format, inputName, isBotTsProject } from "#src/util"
 
 export const handler = async () => {
   if (!isBotTsProject()) return process.exit(1)
@@ -26,7 +26,7 @@ export const handler = async () => {
         value: '{ type: "hour", duration: 2 } /* every 2 hours */',
         name: `Advanced ${styleText(
           "grey",
-          "(each X minutes, hours, days...)"
+          "(each X minutes, hours, days...)",
         )}`,
       },
       {
@@ -37,7 +37,7 @@ export const handler = async () => {
   })
 
   const template = fs.readFileSync(cwd("templates", "cron.ejs"), "utf8")
-  const cronPath = ["src", "cron", name + ".ts"]
+  const cronPath = ["src", "cron", `${name}.ts`]
 
   fs.writeFileSync(
     cwd(...cronPath),
@@ -47,23 +47,23 @@ export const handler = async () => {
         Name: capitalize(name),
         description,
         scheduleType,
-      })
+      }),
     ),
-    "utf8"
+    "utf8",
   )
 
   console.log()
   console.log(
     `✅ Cron job ${styleText(
       "blueBright",
-      name
-    )} has been created at ${styleText("cyanBright", path.join(...cronPath))}`
+      name,
+    )} has been created at ${styleText("cyanBright", path.join(...cronPath))}`,
   )
 }
 
 export const command = new Command("cron")
   .description(
-    "Add a cron job\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-cron"
+    "Add a cron job\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-cron",
   )
   .usage("[--options]")
   .action(handler)

@@ -1,11 +1,11 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
+import { QueryTimeoutError } from "../src/app/errors"
 import {
-  TimeoutHandler,
-  withTimeout,
   createTimeoutController,
   fetchWithTimeout,
+  TimeoutHandler,
+  withTimeout,
 } from "../src/app/timeout"
-import { QueryTimeoutError } from "../src/app/errors"
 
 describe("TimeoutHandler", () => {
   test("should complete before timeout", async () => {
@@ -62,7 +62,7 @@ describe("withTimeout", () => {
         await Bun.sleep(10)
         return "success"
       })(),
-      100
+      100,
     )
 
     expect(result).toBe("success")
@@ -75,8 +75,8 @@ describe("withTimeout", () => {
           await Bun.sleep(100)
           return "success"
         })(),
-        10
-      )
+        10,
+      ),
     ).rejects.toThrow(QueryTimeoutError)
   })
 
@@ -92,8 +92,8 @@ describe("withTimeout", () => {
           await Bun.sleep(10)
           throw new Error("original error")
         })(),
-        100
-      )
+        100,
+      ),
     ).rejects.toThrow("original error")
   })
 })
@@ -151,11 +151,11 @@ describe("fetchWithTimeout", () => {
   })
 
   test("should abort after timeout", async () => {
-    let signalAborted = false
+    let _signalAborted = false
 
     const promise = fetchWithTimeout(async (signal) => {
       await Bun.sleep(100)
-      signalAborted = signal.aborted
+      _signalAborted = signal.aborted
       return "success"
     }, 50)
 

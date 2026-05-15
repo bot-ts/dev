@@ -1,7 +1,7 @@
-import path from "path"
-import md5 from "md5"
-import fs from "fs"
+import fs from "node:fs"
+import path from "node:path"
 import chokidar from "chokidar"
+import md5 from "md5"
 
 export interface HandlerOptions<Data> {
   /**
@@ -69,26 +69,20 @@ export class Handler<Data> {
   public elements: Map<string, Data> = new Map()
   public md5: Map<string, string> = new Map()
   public watcher?: chokidar.FSWatcher
+  private _additionalDirs: string[] = []
 
   public constructor(
     private dirname: string,
-    private options: HandlerOptions<Data>
+    private options: HandlerOptions<Data>,
   ) {}
 
   async init(this: this) {
     this.elements.clear()
 
-    const filenames = await fs.promises.readdir(this.dirname)
+    await this._loadDirectory(this.dirname)
 
-    for (const basename of filenames) {
-      const filepath = path.join(this.dirname, basename)
-
-      try {
-        await this._load(filepath, false)
-      } catch (error: any) {
-        if (error.message.startsWith("Ignored")) continue
-        else throw error
-      }
+    for (const dir of this._additionalDirs) {
+      await this._loadDirectory(dir)
     }
 
     await this.options.onFinish?.(this.elements)
@@ -114,6 +108,50 @@ export class Handler<Data> {
         })
   }
 
+  /**
+   * Register an additional directory to scan during {@link init}. <br>
+   * Must be called **before** {@link init}.
+   */
+  addDirectory(this: this, dirname: string) {
+    this._additionalDirs.push(dirname)
+  }
+
+  /**
+   * Load files from a directory **after** {@link init} has already run. <br>
+   * Useful for late-loading (e.g. module tables that need post-processing).
+   */
+  async loadFrom(this: this, dirname: string) {
+    await this._loadDirectory(dirname)
+  }
+
+  /**
+   * Inject a pre-loaded element as if it had been loaded from the given filepath. <br>
+   * Stores it in {@link elements} and calls the {@link HandlerOptions.onLoad} callback. <br>
+   * Use {@param key} to disambiguate when multiple elements share the same filepath.
+   */
+  async inject(this: this, filepath: string, data: Data, key?: string) {
+    const id = key ? `${filepath}#${key}` : filepath
+    this.elements.set(id, data)
+    await this.options.onLoad?.(filepath, data)
+  }
+
+  private async _loadDirectory(this: this, dirname: string) {
+    if (!fs.existsSync(dirname)) return
+
+    const filenames = await fs.promises.readdir(dirname)
+
+    for (const basename of filenames) {
+      const filepath = path.join(dirname, basename)
+
+      try {
+        await this._load(filepath, false)
+      } catch (error: any) {
+        if (error.message.startsWith("Ignored")) continue
+        else throw error
+      }
+    }
+  }
+
   destroy(this: this) {
     this.watcher?.close()
     this.elements.clear()
@@ -123,7 +161,7 @@ export class Handler<Data> {
   private async _load(
     this: this,
     filepath: string,
-    reloaded: boolean
+    reloaded: boolean,
   ): Promise<void> {
     const basename = path.basename(filepath)
     const filename = path.basename(filepath, path.extname(filepath))
@@ -146,13 +184,13 @@ export class Handler<Data> {
               .replace("$path", filepath)
               .replace("$basename", basename)
               .replace("$filename", filename)
-          : `loaded ${filename}`
+          : `loaded ${filename}`,
       )
 
     let loaded!: Data
 
     const onLoad = reloaded
-      ? this.options.onChange ?? this.options.onLoad
+      ? (this.options.onChange ?? this.options.onLoad)
       : this.options.onLoad
 
     loaded = await this.options.loader(filepath)
@@ -180,7 +218,7 @@ export class Handler<Data> {
               .replace("$path", filepath)
               .replace("$basename", basename)
               .replace("$filename", filename)
-          : `removed ${filename}`
+          : `removed ${filename}`,
       )
 
     const data = this.elements.get(filepath)!

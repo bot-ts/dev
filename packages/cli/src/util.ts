@@ -1,16 +1,15 @@
 #!/usr/bin/env node
 
-import { input, password, select } from "@inquirer/prompts"
-import ejs from "ejs"
-import loading from "loading-cli"
 import { execSync } from "node:child_process"
 import fs from "node:fs"
 import fsp from "node:fs/promises"
 import path from "node:path"
 import url from "node:url"
 import util from "node:util"
-import prettier from "prettier"
-import { PackageJson } from "types-package-json"
+import { input, password, select } from "@inquirer/prompts"
+import ejs from "ejs"
+import loading from "loading-cli"
+import type { PackageJson } from "types-package-json"
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url))
 
@@ -27,7 +26,7 @@ export function inputName(
     kebabCase?: boolean
     main?: boolean
     column?: boolean
-  }
+  },
 ) {
   return input({
     message: `${message} ${util.styleText(
@@ -35,8 +34,8 @@ export function inputName(
       options?.column
         ? "(in snake_case)"
         : options?.main
-        ? "(used as directory/package.json name)"
-        : "(used as filename)"
+          ? "(used as directory/package.json name)"
+          : "(used as filename)",
     )}`,
     required: true,
     default: options?.defaultValue,
@@ -44,8 +43,8 @@ export function inputName(
       options?.column
         ? /^[a-z]+[a-z0-9_]*$/.test(value) || "Must be in snake_case"
         : options?.kebabCase
-        ? /^[a-z]+[a-z0-9-]*$/.test(value) || "Must be in kebab-case"
-        : /^[a-z]+[a-zA-Z0-9]*$/.test(value) || "Must be in camelCase",
+          ? /^[a-z]+[a-z0-9-]*$/.test(value) || "Must be in kebab-case"
+          : /^[a-z]+[a-zA-Z0-9]*$/.test(value) || "Must be in camelCase",
   })
 }
 
@@ -63,19 +62,19 @@ export function isBotTsProject(silent?: boolean): boolean {
       console.error(
         util.styleText(
           "red",
-          'You should only use this command at the root of a "bot.ts" project'
-        )
+          'You should only use this command at the root of a "bot.ts" project',
+        ),
       )
     return false
   }
 
-  if (!packageJson.devDependencies?.hasOwnProperty("@ghom/bot.ts-cli")) {
+  if (!Object.hasOwn(packageJson.devDependencies ?? {}, "@ghom/bot.ts-cli")) {
     if (!silent)
       console.error(
         util.styleText(
           "red",
-          'This project does not seem to be a "bot.ts" project'
-        )
+          'This project does not seem to be a "bot.ts" project',
+        ),
       )
     return false
   }
@@ -84,11 +83,11 @@ export function isBotTsProject(silent?: boolean): boolean {
 }
 
 export function getDatabaseDriverName(packageJson: PackageJson) {
-  if (packageJson?.dependencies?.["pg"]) {
+  if (packageJson?.dependencies?.pg) {
     return "pg"
-  } else if (packageJson?.dependencies?.["mysql2"]) {
+  } else if (packageJson?.dependencies?.mysql2) {
     return "mysql2"
-  } else if (packageJson?.dependencies?.["sqlite3"]) {
+  } else if (packageJson?.dependencies?.sqlite3) {
     return "sqlite3"
   } else throw new Error("No database driver found in package.json")
 }
@@ -108,7 +107,7 @@ export function capitalize(str: string) {
 export async function loader(
   start: string,
   callback: () => unknown,
-  end: string
+  end: string,
 ) {
   const time = Date.now()
   const load = loading({
@@ -121,15 +120,15 @@ export async function loader(
   load.succeed(
     `${util.styleText("bold", end)} ${util.styleText(
       "grey",
-      `${Date.now() - time}ms`
-    )}`
+      `${Date.now() - time}ms`,
+    )}`,
   )
 }
 
 export async function injectEnvLine(
   name: string,
   value: string,
-  projectPath = cwd()
+  projectPath = cwd(),
 ) {
   let env: string | undefined
 
@@ -151,11 +150,17 @@ export async function injectEnvLine(
 }
 
 export function format(str: string) {
-  return prettier.format(str, {
-    parser: "typescript",
-    semi: false,
-    endOfLine: "crlf",
-  })
+  try {
+    return execSync(
+      `"${root("node_modules", ".bin", "biome")}" format --stdin-file-path=file.ts`,
+      {
+        input: str,
+        encoding: "utf8",
+      },
+    )
+  } catch {
+    return str
+  }
 }
 
 export async function promptDatabase(options?: { client?: string }) {
@@ -181,7 +186,7 @@ export async function promptDatabase(options?: { client?: string }) {
     throw new Error(`Invalid database client: "${client}"`)
   }
 
-  let database: {
+  const database: {
     host?: string
     port?: string
     password?: string
@@ -230,7 +235,7 @@ export async function promptEngine() {
     default: "node",
   })
 
-  let list = ["npm", "yarn", "pnpm"]
+  const list = ["npm", "yarn", "pnpm"]
 
   if (runtime !== "node") list.unshift(runtime)
 
@@ -255,10 +260,10 @@ export async function setupDatabase(
     user?: string
     database?: string
   },
-  projectPath = cwd()
+  projectPath = cwd(),
 ) {
   const packageJson = readJSON<PackageJson>(
-    path.join(projectPath, "package.json")
+    path.join(projectPath, "package.json"),
   )
 
   if (!packageJson.dependencies) packageJson.dependencies = {}
@@ -276,7 +281,7 @@ export async function setupDatabase(
 
   const template = await fsp.readFile(
     path.join(projectPath, "templates", "database.ejs"),
-    "utf8"
+    "utf8",
   )
 
   await fsp.writeFile(
@@ -284,9 +289,9 @@ export async function setupDatabase(
     format(
       ejs.compile(template)({
         client: database.client,
-      })
+      }),
     ),
-    "utf8"
+    "utf8",
   )
 
   // Only inject env lines if a database is configured
@@ -312,7 +317,7 @@ export async function setupDatabase(
 
 export async function removeDatabase(projectPath = cwd()) {
   const packageJson = readJSON<PackageJson>(
-    path.join(projectPath, "package.json")
+    path.join(projectPath, "package.json"),
   )
 
   // Remove all database dependencies
@@ -337,7 +342,7 @@ export async function removeDatabase(projectPath = cwd()) {
   if (fs.existsSync(databaseFilePath)) {
     const template = await fsp.readFile(
       path.join(projectPath, "templates", "database.ejs"),
-      "utf8"
+      "utf8",
     )
 
     await fsp.writeFile(
@@ -345,9 +350,9 @@ export async function removeDatabase(projectPath = cwd()) {
       format(
         ejs.compile(template)({
           client: null,
-        })
+        }),
       ),
-      "utf8"
+      "utf8",
     )
   }
 }
@@ -370,7 +375,7 @@ export async function removeEnvLine(name: string, projectPath = cwd()) {
   await fsp.writeFile(
     path.join(projectPath, ".env"),
     filteredLines.join("\n"),
-    "utf8"
+    "utf8",
   )
 }
 
@@ -387,6 +392,204 @@ export function getExistingTables(projectPath = cwd()): string[] {
     .map((file) => file.replace(".ts", ""))
 }
 
+// --- Module management utilities ---
+
+export interface ModulesConfig {
+  keepDependencies: string[]
+  modules: Record<string, boolean>
+}
+
+interface ModuleManifest {
+  name?: string
+  description?: string
+  dependencies?: Record<string, string>
+}
+
+export function modulesConfigPath(): string {
+  return cwd("modules.json")
+}
+
+export function modulePath(name: string): string {
+  return cwd("src", "modules", name)
+}
+
+export function readModulesConfig(): ModulesConfig {
+  const configPath = modulesConfigPath()
+  if (!fs.existsSync(configPath)) return { keepDependencies: [], modules: {} }
+  return readJSON(configPath)
+}
+
+export function writeModulesConfig(config: ModulesConfig) {
+  writeJSON(modulesConfigPath(), config)
+}
+
+export function getModuleNames(filter?: "enabled" | "disabled"): string[] {
+  const { modules } = readModulesConfig()
+  const entries = Object.entries(modules)
+  if (filter === "enabled") return entries.filter(([, v]) => v).map(([n]) => n)
+  if (filter === "disabled")
+    return entries.filter(([, v]) => !v).map(([n]) => n)
+  return entries.map(([n]) => n)
+}
+
+export function getInstalledModuleNames(): string[] {
+  const modulesDir = cwd("src", "modules")
+  if (!fs.existsSync(modulesDir)) return []
+  return fs
+    .readdirSync(modulesDir, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+}
+
+/**
+ * Collect dependencies declared by other modules.
+ * Returns two sets: deps from enabled modules, and deps from all modules.
+ */
+function collectOtherModuleDeps(config: ModulesConfig, excludeName: string) {
+  const enabledDeps = new Set<string>()
+  const allDeps = new Set<string>()
+
+  for (const [modName, enabled] of Object.entries(config.modules)) {
+    if (modName === excludeName) continue
+    const jsonPath = path.join(modulePath(modName), "module.json")
+    if (!fs.existsSync(jsonPath)) continue
+    const manifest = readJSON<ModuleManifest>(jsonPath)
+    if (!manifest.dependencies) continue
+    for (const dep of Object.keys(manifest.dependencies)) {
+      allDeps.add(dep)
+      if (enabled) enabledDeps.add(dep)
+    }
+  }
+
+  return { enabledDeps, allDeps }
+}
+
+export function enableModule(name: string) {
+  const config = readModulesConfig()
+  config.modules[name] = true
+  writeModulesConfig(config)
+  installModuleDeps(name)
+  console.log(
+    `Module ${util.styleText("magentaBright", name)} has been ${util.styleText(
+      "greenBright",
+      "enabled",
+    )}`,
+  )
+}
+
+export function disableModule(name: string) {
+  uninstallModuleDeps(name)
+  const config = readModulesConfig()
+  config.modules[name] = false
+  writeModulesConfig(config)
+  console.log(
+    `Module ${util.styleText("magentaBright", name)} has been ${util.styleText(
+      "yellowBright",
+      "disabled",
+    )}`,
+  )
+}
+
+export function removeModule(name: string, options?: { skipDeps?: boolean }) {
+  if (!options?.skipDeps) uninstallModuleDeps(name)
+  const dir = modulePath(name)
+  if (fs.existsSync(dir)) {
+    fs.rmSync(dir, { recursive: true, force: true })
+  }
+  const config = readModulesConfig()
+  delete config.modules[name]
+  writeModulesConfig(config)
+  console.log(
+    `Module ${util.styleText("magentaBright", name)} has been ${util.styleText(
+      "redBright",
+      "removed",
+    )}`,
+  )
+}
+
+export function installModuleDeps(name: string) {
+  const jsonPath = path.join(modulePath(name), "module.json")
+  if (!fs.existsSync(jsonPath)) return
+
+  const manifest = readJSON<ModuleManifest>(jsonPath)
+  if (!manifest.dependencies || Object.keys(manifest.dependencies).length === 0)
+    return
+
+  const packageJson = readJSON<PackageJson>(cwd("package.json"))
+  if (!packageJson.dependencies) packageJson.dependencies = {}
+
+  const config = readModulesConfig()
+  let addedDeps = false
+  let configChanged = false
+
+  for (const [dep, version] of Object.entries(manifest.dependencies)) {
+    if (packageJson.dependencies[dep]) {
+      if (!config.keepDependencies.includes(dep)) {
+        config.keepDependencies.push(dep)
+        configChanged = true
+      }
+    } else {
+      packageJson.dependencies[dep] = version
+      addedDeps = true
+      console.log(
+        `  Added dependency ${util.styleText("cyanBright", dep)}@${version}`,
+      )
+    }
+  }
+
+  if (configChanged) writeModulesConfig(config)
+
+  if (addedDeps) {
+    writeJSON(cwd("package.json"), packageJson)
+    console.log(
+      util.styleText(
+        "grey",
+        "  Run your package manager install to fetch new dependencies",
+      ),
+    )
+  }
+}
+
+export function uninstallModuleDeps(name: string) {
+  const jsonPath = path.join(modulePath(name), "module.json")
+  if (!fs.existsSync(jsonPath)) return
+
+  const manifest = readJSON<ModuleManifest>(jsonPath)
+  if (!manifest.dependencies || Object.keys(manifest.dependencies).length === 0)
+    return
+
+  const config = readModulesConfig()
+  const { enabledDeps, allDeps } = collectOtherModuleDeps(config, name)
+
+  const packageJson = readJSON<PackageJson>(cwd("package.json"))
+  if (!packageJson.dependencies) return
+
+  let removed = false
+  for (const dep of Object.keys(manifest.dependencies)) {
+    if (config.keepDependencies.includes(dep)) continue
+    if (enabledDeps.has(dep)) continue
+    if (!packageJson.dependencies[dep]) continue
+
+    delete packageJson.dependencies[dep]
+    removed = true
+    console.log(`  Removed dependency ${util.styleText("cyanBright", dep)}`)
+  }
+
+  if (removed) {
+    writeJSON(cwd("package.json"), packageJson)
+    console.log(
+      util.styleText("grey", "  Run your package manager install to clean up"),
+    )
+  }
+
+  // Clean up keepDependencies no longer referenced by any module
+  const cleaned = config.keepDependencies.filter((dep) => allDeps.has(dep))
+  if (cleaned.length !== config.keepDependencies.length) {
+    config.keepDependencies = cleaned
+    writeModulesConfig(config)
+  }
+}
+
 export async function setupEngine(
   config: {
     runtime: string
@@ -395,7 +598,7 @@ export async function setupEngine(
   options: {
     setupDocker?: boolean
   },
-  projectPath = cwd()
+  projectPath = cwd(),
 ) {
   await injectEnvLine("RUNTIME", config.runtime, projectPath)
   await injectEnvLine("PACKAGE_MANAGER", config.packageManager, projectPath)
@@ -404,13 +607,13 @@ export async function setupEngine(
     components: Record<string, Record<string, string>>
   }>(path.join(projectPath, "compatibility.json"))
 
-  for (const lockfile of Object.values(compatibility.components["lockfile"])) {
+  for (const lockfile of Object.values(compatibility.components.lockfile)) {
     try {
       await fsp.unlink(path.join(projectPath, lockfile))
     } catch {}
   }
 
-  execSync(compatibility.components["install"][config.packageManager], {
+  execSync(compatibility.components.install[config.packageManager], {
     stdio: ["ignore", "ignore", "pipe"],
     cwd: projectPath,
   })
@@ -428,7 +631,7 @@ export async function setupScripts(
     runtime: string
     packageManager: string
   },
-  projectPath = cwd()
+  projectPath = cwd(),
 ) {
   const packageJsonPath = path.join(projectPath, "package.json")
   const compatibilityJsonPath = path.join(projectPath, "compatibility.json")
@@ -462,7 +665,7 @@ export async function setupScripts(
         }
       } else {
         throw new Error(
-          `Tag "${tag}" not found in compatibility.json, please remove the tag from the file.`
+          `Tag "${tag}" not found in compatibility.json, please remove the tag from the file.`,
         )
       }
     })
@@ -479,7 +682,7 @@ export async function setupScripts(
   await fsp.writeFile(
     packageJsonPath,
     JSON.stringify(packageJson, null, 2),
-    "utf-8"
+    "utf-8",
   )
 
   return components
@@ -491,12 +694,12 @@ export async function setupDocker(
     runtime: string
     packageManager: string
   },
-  projectPath = cwd()
+  projectPath = cwd(),
 ) {
   if (config.client === undefined) {
     try {
       config.client = getDatabaseDriverName(
-        readJSON(path.join(projectPath, "package.json"))
+        readJSON(path.join(projectPath, "package.json")),
       )
     } catch {
       // no database configured
@@ -518,13 +721,13 @@ export async function setupDocker(
       ...config,
       lockfile: compatibility.components.lockfile[config.packageManager],
     }),
-    "utf8"
+    "utf8",
   )
 
   await fsp.writeFile(
     path.join(projectPath, "docker-compose.yml"),
     ejs.compile(compose)(config),
-    "utf8"
+    "utf8",
   )
 }
 
@@ -533,16 +736,16 @@ export async function setupWorkflow(
     runtime: string
     packageManager: string
   },
-  projectPath = cwd()
+  projectPath = cwd(),
 ) {
   const template = await fsp.readFile(
     path.join(projectPath, "templates", "workflow.ejs"),
-    "utf8"
+    "utf8",
   )
 
   await fsp.writeFile(
     path.join(projectPath, ".github", "workflows", "tests.yml"),
     ejs.compile(template)(config),
-    "utf8"
+    "utf8",
   )
 }

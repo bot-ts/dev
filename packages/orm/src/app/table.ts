@@ -121,6 +121,7 @@ export class Table<
   Columns extends Record<string, ColumnDef<any, any>> = Record<string, ColumnDef<any, any>>,
   Migrations extends Record<string, MigrationValue> = {},
 > {
+  readonly type = "table" as const
   public orm?: ORM
 
   public _whereCache?: CachedQuery<

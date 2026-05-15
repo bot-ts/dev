@@ -1,3 +1,10 @@
+import { execSync } from "node:child_process"
+import fs from "node:fs"
+import * as util from "node:util"
+import { confirm, select } from "@inquirer/prompts"
+import { Command } from "commander"
+import dotenv, { type DotenvParseOutput } from "dotenv"
+import type { PackageJson } from "types-package-json"
 import {
   cwd,
   getDatabaseDriverName,
@@ -9,13 +16,6 @@ import {
   removeDatabase,
   setupDatabase,
 } from "#src/util"
-import { confirm, select } from "@inquirer/prompts"
-import { Command } from "commander"
-import dotenv, { DotenvParseOutput } from "dotenv"
-import { execSync } from "node:child_process"
-import fs from "node:fs"
-import * as util from "node:util"
-import { PackageJson } from "types-package-json"
 
 async function performDatabaseRemoval() {
   await removeDatabase(cwd())
@@ -32,11 +32,11 @@ async function performDatabaseRemoval() {
     await loader(
       "uninstalling database",
       () => {
-        execSync(components["install"][env.PACKAGE_MANAGER], {
+        execSync(components.install[env.PACKAGE_MANAGER], {
           stdio: "ignore",
         })
       },
-      "database uninstalled"
+      "database uninstalled",
     )
   }
 
@@ -51,8 +51,8 @@ async function confirmDatabaseRemoval(baseClient: string): Promise<boolean> {
     console.warn(
       util.styleText(
         "yellow",
-        `⚠️  Warning: Your project contains ${tables.length} table(s) in src/tables/:`
-      )
+        `⚠️  Warning: Your project contains ${tables.length} table(s) in src/tables/:`,
+      ),
     )
     for (const table of tables) {
       console.warn(util.styleText("grey", `   - ${table}.ts`))
@@ -60,8 +60,8 @@ async function confirmDatabaseRemoval(baseClient: string): Promise<boolean> {
     console.warn(
       util.styleText(
         "yellow",
-        "   These tables will no longer work without a database."
-      )
+        "   These tables will no longer work without a database.",
+      ),
     )
     console.log()
   }
@@ -94,7 +94,7 @@ export const handler = async (options?: {
   if (options?.remove) {
     if (!baseClient) {
       console.error(
-        util.styleText("red", "No database is currently configured.")
+        util.styleText("red", "No database is currently configured."),
       )
       return process.exit(1)
     }
@@ -142,7 +142,7 @@ export const handler = async (options?: {
 
   if (client !== baseClient && !options?.client) {
     console.warn(
-      `⚠️ You'll probably need to transfer the old data to the new database client`
+      `⚠️ You'll probably need to transfer the old data to the new database client`,
     )
 
     const backup = await confirm({
@@ -154,8 +154,8 @@ export const handler = async (options?: {
       console.error(
         `${util.styleText(
           "red",
-          "The backup command is not yet automated."
-        )}\nPlease backup manually using the @ghom/orm documentaiton.\nhttps://www.npmjs.com/package/@ghom/orm#Backup`
+          "The backup command is not yet automated.",
+        )}\nPlease backup manually using the @ghom/orm documentaiton.\nhttps://www.npmjs.com/package/@ghom/orm#Backup`,
       )
 
       return process.exit(1)
@@ -185,11 +185,11 @@ export const handler = async (options?: {
     await loader(
       "installing",
       () => {
-        execSync(components["install"][env?.PACKAGE_MANAGER ?? "npm"], {
+        execSync(components.install[env?.PACKAGE_MANAGER ?? "npm"], {
           stdio: "ignore",
         })
       },
-      "installed"
+      "installed",
     )
   }
 
@@ -199,7 +199,7 @@ export const handler = async (options?: {
 
 export const command = new Command("database")
   .description(
-    "Setup or remove database\nMore info: https://ghom.gitbook.io/bot.ts/usage/use-database"
+    "Setup or remove database\nMore info: https://ghom.gitbook.io/bot.ts/usage/use-database",
   )
   .option("--client <client>", "Database client (sqlite3, pg or mysql2)")
   .option("--remove", "Remove the database configuration")

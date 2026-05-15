@@ -8,7 +8,6 @@ import { RetryHandler } from "./retry.js"
 import { ThrottledQuery } from "./throttle.js"
 import { withTimeout } from "./timeout.js"
 import {
-  CircuitState,
   defaultKeyFn,
   type QueryFn,
   type QueryOptions,
@@ -91,12 +90,8 @@ export class Query<Params extends unknown[], Result> {
     }
 
     if (_options.dedup) {
-      this._dedup = new DedupHandler(
-        ((...params: Params) => this._executePipeline(...params)) as QueryFn<
-          Params,
-          Result
-        >,
-      )
+      this._dedup = new DedupHandler(((...params: Params) =>
+        this._executePipeline(...params)) as QueryFn<Params, Result>)
     }
 
     if (_options.circuitBreaker) {
@@ -327,10 +322,7 @@ export class Query<Params extends unknown[], Result> {
       this._circuitBreaker?.recordFailure()
 
       // Track timeout
-      if (
-        error instanceof Error &&
-        error.name === "QueryTimeoutError"
-      ) {
+      if (error instanceof Error && error.name === "QueryTimeoutError") {
         this._stats.timeouts++
       }
 

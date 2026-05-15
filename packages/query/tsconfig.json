@@ -9,7 +9,9 @@
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "declaration": true,
-    "typeRoots": ["./node_modules/@types", "./dist/typings"]
+    "types": ["node"],
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "include": ["src/**/*", "dist/typings/**/*"]
 }

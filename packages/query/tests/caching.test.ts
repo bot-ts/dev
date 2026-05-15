@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { CachedQuery } from "../src/app/caching"
 
 describe("CachedQuery", () => {
@@ -113,7 +113,7 @@ describe("CachedQuery", () => {
         return callCount
       },
       50,
-      { staleWhileRevalidate: true }
+      { staleWhileRevalidate: true },
     )
 
     const first = await query.get("test")

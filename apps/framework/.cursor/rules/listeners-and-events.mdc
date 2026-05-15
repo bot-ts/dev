@@ -1,6 +1,6 @@
 ---
 description: Rules for creating event listeners, buttons, and cron jobs in bot.ts
-globs: ["src/listeners/**/*.ts", "src/buttons/**/*.ts", "src/cron/**/*.ts"]
+globs: ["src/listeners/**/*.ts", "src/buttons/**/*.ts", "src/cron/**/*.ts", "src/modules/*/listeners/**/*.ts", "src/modules/*/buttons/**/*.ts", "src/modules/*/cron/**/*.ts"]
 alwaysApply: false
 ---
 

@@ -6,9 +6,11 @@
     "outDir": "bin",
     "rootDir": "src",
     "declaration": false,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "#src/*": ["./src/*"]

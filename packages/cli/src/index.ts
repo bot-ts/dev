@@ -1,29 +1,31 @@
-import { program, Command } from "commander"
-import dotenv, { DotenvConfigOutput } from "dotenv"
+import cp from "node:child_process"
 import path from "node:path"
 import url from "node:url"
-import cp from "node:child_process"
-import { PackageJson } from "types-package-json"
+import { Command, program } from "commander"
+import dotenv, { type DotenvConfigOutput } from "dotenv"
+import type { PackageJson } from "types-package-json"
 
 import { command as add } from "#src/cmd/add"
 import { command as config } from "#src/cmd/config"
+import { command as _module } from "#src/cmd/module"
 import { command as _new } from "#src/cmd/new"
-import { readJSON, isBotTsProject, cwd } from "#src/util"
+import { cwd, isBotTsProject, readJSON } from "#src/util"
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url))
 
 const bot = program
   .name("bot")
   .description(
-    "Bot.ts is a modern framework for creating Discord bots with TypeScript."
+    "Bot.ts is a modern framework for creating Discord bots with TypeScript.",
   )
   .usage("<cmd> [args] [--options]")
   .version(
-    readJSON<PackageJson>(path.join(dirname, "..", "package.json")).version
+    readJSON<PackageJson>(path.join(dirname, "..", "package.json")).version,
   )
   .addCommand(_new)
   .addCommand(add)
   .addCommand(config)
+  .addCommand(_module)
 
 if (isBotTsProject(true)) {
   const compatibility = readJSON<{
@@ -74,10 +76,10 @@ if (isBotTsProject(true)) {
               sub === "dev"
                 ? "Add a dev dependency"
                 : sub === "global"
-                ? "Add a global dependency"
-                : "Add a dependency"
+                  ? "Add a global dependency"
+                  : "Add a dependency",
             )
-            .action(action)
+            .action(action),
         )
       }
     }

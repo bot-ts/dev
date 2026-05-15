@@ -1,13 +1,13 @@
 Create a new database table for this bot.ts project.
 
-The framework uses `@ghom/orm` (Knex-based ORM with SQLite3 by default).
+The framework uses `@ghom/orm` (Knex-based ORM with SQLite3 by default). Types are auto-inferred from column definitions — no manual TypeScript interface needed.
 
 The user will provide: table name, description, and columns.
 
 If the user hasn't provided details, ask for:
 1. Table name (snake_case, e.g. `guild_members`)
 2. Short description
-3. Columns: name, type, nullable/required, unique, primary key
+3. Columns: name, type, nullable/required, unique, default value
 
 Then create the file at `src/tables/<name>.ts` (Biome style: tabs, no semicolons, double quotes).
 
@@ -16,45 +16,35 @@ Then create the file at `src/tables/<name>.ts` (Biome style: tabs, no semicolons
 ```typescript
 import { Table } from "@ghom/orm"
 
-export interface GuildMember {
-  id: number
-  guild_id: string
-  user_id: string
-  score?: number
-  joined_at: Date
-}
-
-export default new Table<GuildMember>({
+export default new Table({
   name: "guild_members",
   description: "Members tracked per guild",
-  setup: (table) => {
-    table.increments("id").primary().unsigned()
-    table.string("guild_id").notNullable()
-    table.string("user_id").notNullable()
-    table.integer("score").defaultTo(0)
-    table.timestamp("joined_at").defaultTo(table.client.fn.now())
-  },
+  columns: (col) => ({
+    id: col.increments(),
+    guild_id: col.string(),
+    user_id: col.string(),
+    score: col.integer().defaultTo(0),
+    joined_at: col.timestamp().defaultTo(col.fn.now()),
+  }),
 })
 ```
 
 ### With migrations (add columns in future versions)
 
 ```typescript
-export default new Table<GuildMember>({
+import { Table, col, migrate } from "@ghom/orm"
+
+export default new Table({
   name: "guild_members",
   description: "Members tracked per guild",
-  setup: (table) => {
-    table.increments("id").primary().unsigned()
-    table.string("guild_id").notNullable()
-    table.string("user_id").notNullable()
-  },
+  columns: (col) => ({
+    id: col.increments(),
+    guild_id: col.string(),
+    user_id: col.string(),
+  }),
   migrations: {
-    1: (table) => {
-      table.integer("score").defaultTo(0)
-    },
-    2: (table) => {
-      table.boolean("is_premium").defaultTo(false)
-    },
+    1: migrate.addColumn("score", col.integer().defaultTo(0)),
+    2: migrate.addColumn("is_premium", col.boolean().defaultTo(false)),
   },
 })
 ```
@@ -62,38 +52,61 @@ export default new Table<GuildMember>({
 ### With caching
 
 ```typescript
-export default new Table<GuildMember>({
+import { Table } from "@ghom/orm"
+
+export default new Table({
   name: "guild_members",
   description: "Members tracked per guild",
   caching: 300_000, // cache for 5 minutes
-  setup: (table) => {
-    // ...
-  },
+  columns: (col) => ({
+    id: col.increments(),
+    guild_id: col.string(),
+    user_id: col.string(),
+  }),
 })
 ```
 
-### Knex column types reference
+### Column types reference (`col.*`)
 
 ```typescript
-table.increments("id")           // auto-increment integer PK
-table.string("name")             // VARCHAR(255)
-table.text("content")            // TEXT
-table.integer("count")           // INTEGER
-table.bigInteger("big_id")       // BIGINT
-table.float("ratio")             // FLOAT
-table.boolean("active")          // BOOLEAN
-table.timestamp("created_at")    // TIMESTAMP
-table.date("birthday")           // DATE
-table.json("metadata")           // JSON
+col.increments()       // auto-increment integer PK
+col.bigIncrements()    // auto-increment bigint PK
+col.string()           // VARCHAR(255)
+col.text()             // TEXT
+col.integer()          // INTEGER
+col.bigInteger()       // BIGINT
+col.float()            // FLOAT
+col.decimal()          // DECIMAL
+col.boolean()          // BOOLEAN
+col.timestamp()        // TIMESTAMP
+col.date()             // DATE
+col.json()             // JSON
+col.uuid()             // UUID
+col.binary()           // BINARY
+col.enum(["a", "b"])   // ENUM
 
-// Modifiers
-.notNullable()
-.nullable()
-.defaultTo(value)
-.unique()
-.unsigned()
-.primary()
-.references("id").inTable("other_table").onDelete("cascade")
+// Modifiers (chainable)
+.nullable()            // allows NULL (types as T | null)
+.defaultTo(value)      // default value
+.unique()              // UNIQUE constraint
+.primary()             // PRIMARY KEY
+.index()               // adds an index
+.references("id").inTable("other").onDelete("cascade")  // foreign key
+```
+
+### Migration helpers (`migrate.*`)
+
+```typescript
+import { col, migrate } from "@ghom/orm"
+
+migrate.addColumn("email", col.string())
+migrate.dropColumn("old_field")
+migrate.renameColumn("name", "username")
+migrate.raw((builder) => builder.dropColumn("legacy"))
+migrate.sequence(
+  migrate.addColumn("phone", col.string()),
+  migrate.addColumn("address", col.string().nullable()),
+)
 ```
 
 ### Using the table in commands/listeners
@@ -128,10 +141,9 @@ const cached = await guildMembersTable.cache.get(
 ### Rules
 
 - The `name` in `Table()` must match the actual database table name
-- The TypeScript interface must have `?` for nullable/optional columns
-- Migrations run automatically in ascending numeric order on each bot start
+- Types are auto-inferred from `columns` — nullable columns (`col.x().nullable()`) produce `T | null`
+- Migrations run automatically in ascending key order on each bot start
 - Higher `priority` number = loads before lower priority tables (useful for foreign keys)
 - Configure database engine with `bot config database` — defaults to SQLite3
-- Full Knex docs: https://knexjs.org/guide/schema-builder.html
 
 After creating the file, remind the user to run `bun run format`.

@@ -117,7 +117,7 @@ export class DebounceHandler<Params extends unknown[], Result> {
    * Reset all state
    */
   reset(): void {
-    for (const [key, state] of this._state) {
+    for (const [_key, state] of this._state) {
       if (state.timer) clearTimeout(state.timer)
       if (state.maxWaitTimer) clearTimeout(state.maxWaitTimer)
       for (const { reject } of state.pendingResolvers) {

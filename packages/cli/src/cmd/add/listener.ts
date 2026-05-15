@@ -1,3 +1,9 @@
+import fs from "node:fs"
+import path from "node:path"
+import { styleText } from "node:util"
+import { confirm, input, select } from "@inquirer/prompts"
+import { Command } from "commander"
+import ejs from "ejs"
 import {
   cwd,
   format,
@@ -6,18 +12,12 @@ import {
   readJSON,
   root,
 } from "#src/util"
-import { confirm, input, select } from "@inquirer/prompts"
-import { Command } from "commander"
-import ejs from "ejs"
-import fs from "node:fs"
-import path from "node:path"
-import { styleText } from "node:util"
 
 export const handler = async () => {
   if (!isBotTsProject()) return process.exit(1)
 
   const events = readJSON<Record<string, string | string[]>>(
-    root("events.json")
+    root("events.json"),
   )
 
   const event = await select({
@@ -29,13 +29,13 @@ export const handler = async () => {
   })
 
   const category = await inputName(
-    `Enter a category name ${styleText("grey", "(tracker, mod, etc)")}`
+    `Enter a category name ${styleText("grey", "(tracker, mod, etc)")}`,
   )
 
   const once = await confirm({
     message: `Is this a one-time listener? ${styleText(
       "grey",
-      "(like on ready)"
+      "(like on ready)",
     )}`,
     default: false,
   })
@@ -48,7 +48,7 @@ export const handler = async () => {
   const args = events[event]
   const filename = [category, event].filter(Boolean).join(".")
   const template = fs.readFileSync(cwd("templates", "listener.ejs"), "utf8")
-  const listenerPath = ["src", "listeners", filename + ".ts"]
+  const listenerPath = ["src", "listeners", `${filename}.ts`]
 
   fs.writeFileSync(
     cwd(...listenerPath),
@@ -58,26 +58,26 @@ export const handler = async () => {
         once,
         description,
         args: Array.isArray(args) ? args : [args],
-      })
+      }),
     ),
-    "utf8"
+    "utf8",
   )
 
   console.log()
   console.log(
     `✅ Listener ${styleText(
       "blueBright",
-      event
+      event,
     )} has been created at ${styleText(
       "cyanBright",
-      path.join(...listenerPath)
-    )}`
+      path.join(...listenerPath),
+    )}`,
   )
 }
 
 export const command = new Command("listener")
   .description(
-    "Add a listener\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-listener"
+    "Add a listener\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-listener",
   )
   .usage("[--options]")
   .action(handler)

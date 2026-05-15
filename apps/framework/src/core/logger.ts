@@ -9,17 +9,16 @@ const warn = systemLogger.warn.bind(systemLogger)
 const error = systemLogger.error.bind(systemLogger)
 const success = systemLogger.success.bind(systemLogger)
 
-export { log, warn, error, success }
+export type * from "@ghom/logger"
 
 export {
-	Logger,
-	LoggerLevels,
-	defaultLoggerRenders,
-	defaultLoggerColors,
-	defaultLoggerPattern,
-	loggerLevelName,
+  defaultLoggerColors,
+  defaultLoggerPattern,
+  defaultLoggerRenders,
+  Logger,
+  LoggerLevels,
+  loggerLevelName,
 } from "@ghom/logger"
-
-export type * from "@ghom/logger"
+export { error, log, success, warn }
 
 export default systemLogger

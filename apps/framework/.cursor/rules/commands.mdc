@@ -1,6 +1,6 @@
 ---
 description: Rules for creating textual commands and slash commands in bot.ts
-globs: ["src/commands/**/*.ts", "src/slash/**/*.ts"]
+globs: ["src/commands/**/*.ts", "src/slash/**/*.ts", "src/modules/*/commands/**/*.ts", "src/modules/*/slash/**/*.ts"]
 alwaysApply: false
 ---
 

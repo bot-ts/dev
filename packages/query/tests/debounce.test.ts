@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { DebounceHandler } from "../src/app/debounce"
 
 describe("DebounceHandler", () => {
@@ -12,7 +12,7 @@ describe("DebounceHandler", () => {
         values.push(val)
         return val
       },
-      { wait: 50 }
+      { wait: 50 },
     )
 
     // Rapid calls - only the last should execute
@@ -34,7 +34,7 @@ describe("DebounceHandler", () => {
         executed = true
         return "done"
       },
-      { wait: 50 }
+      { wait: 50 },
     )
 
     const promise = debounced.execute("test")
@@ -49,10 +49,10 @@ describe("DebounceHandler", () => {
 
   test("should respect maxWait", async () => {
     let callCount = 0
-    const debounced = new DebounceHandler(
-      async () => ++callCount,
-      { wait: 100, maxWait: 50 }
-    )
+    const debounced = new DebounceHandler(async () => ++callCount, {
+      wait: 100,
+      maxWait: 50,
+    })
 
     const start = Date.now()
     const promise = debounced.execute("test")
@@ -72,7 +72,7 @@ describe("DebounceHandler", () => {
         executed = true
         return "done"
       },
-      { wait: 100 }
+      { wait: 100 },
     )
 
     const promise = debounced.execute("test")
@@ -89,10 +89,10 @@ describe("DebounceHandler", () => {
         executed = true
         return "done"
       },
-      { wait: 1000 }
+      { wait: 1000 },
     )
 
-    const promise = debounced.execute("test")
+    const _promise = debounced.execute("test")
     const flushed = await debounced.flush("test")
 
     expect(executed).toBe(true)
@@ -106,7 +106,7 @@ describe("DebounceHandler", () => {
         results.push(val)
         return val
       },
-      { wait: 50 }
+      { wait: 50 },
     )
 
     const [a, b] = await Promise.all([

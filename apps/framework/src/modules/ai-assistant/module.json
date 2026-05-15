@@ -1,0 +1,7 @@
+{
+  "name": "ai-assistant",
+  "description": "AI-powered assistant for bot management via LLM",
+  "dependencies": {
+    "openai": "^4.80.0"
+  }
+}

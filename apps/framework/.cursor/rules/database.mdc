@@ -1,6 +1,6 @@
 ---
 description: Rules for database tables, ORM usage, and caching in bot.ts
-globs: ["src/tables/**/*.ts", "src/namespaces/**/*.ts", "src/commands/**/*.ts", "src/slash/**/*.ts"]
+globs: ["src/tables/**/*.ts", "src/namespaces/**/*.ts", "src/commands/**/*.ts", "src/slash/**/*.ts", "src/modules/*/tables/**/*.ts"]
 alwaysApply: false
 ---
 
@@ -10,44 +10,56 @@ This project uses `@ghom/orm`, a Knex-based ORM. Database tables are defined in 
 
 ## Table definition
 
+Types are auto-inferred from column definitions — no manual TypeScript interface needed.
+
 ```typescript
 import { Table } from "@ghom/orm"
 
-export interface MyEntity {
-  id: number
-  name: string
-  score?: number         // optional = nullable column
-  created_at: Date
-}
-
-export default new Table<MyEntity>({
+export default new Table({
   name: "my_entities",
   description: "Description for logs",
-  setup: (table) => {
-    table.increments("id").primary().unsigned()
-    table.string("name").notNullable()
-    table.integer("score").defaultTo(0)
-    table.timestamp("created_at").defaultTo(table.client.fn.now())
-  },
+  columns: (col) => ({
+    id: col.increments(),
+    name: col.string(),
+    score: col.integer().defaultTo(0),
+    created_at: col.timestamp().defaultTo(col.fn.now()),
+  }),
 })
 ```
 
 ## Migrations
 
-Add new columns without breaking existing data:
+Add new columns without breaking existing data using typed migration helpers:
 
 ```typescript
-export default new Table<MyEntity>({
+import { Table, col, migrate } from "@ghom/orm"
+
+export default new Table({
   name: "my_entities",
-  setup: (table) => {
-    table.increments("id").primary().unsigned()
-    table.string("name").notNullable()
-  },
+  columns: (col) => ({
+    id: col.increments(),
+    name: col.string(),
+  }),
   migrations: {
-    1: (table) => table.integer("score").defaultTo(0),
-    2: (table) => table.boolean("is_premium").defaultTo(false),
+    1: migrate.addColumn("score", col.integer().defaultTo(0)),
+    2: migrate.addColumn("is_premium", col.boolean().defaultTo(false)),
   },
 })
+```
+
+### Migration helpers (`migrate.*`)
+
+```typescript
+import { col, migrate } from "@ghom/orm"
+
+migrate.addColumn("email", col.string())
+migrate.dropColumn("old_field")
+migrate.renameColumn("name", "username")
+migrate.raw((builder) => builder.dropColumn("legacy"))
+migrate.sequence(
+  migrate.addColumn("phone", col.string()),
+  migrate.addColumn("address", col.string().nullable()),
+)
 ```
 
 - Migrations run in ascending numeric order on every bot start
@@ -57,10 +69,13 @@ export default new Table<MyEntity>({
 ## Table loading priority
 
 ```typescript
-export default new Table<MyEntity>({
+export default new Table({
   name: "my_entities",
   priority: 10, // higher = loads/migrates first (useful for FK dependencies)
-  setup: (table) => { /* ... */ },
+  columns: (col) => ({
+    id: col.increments(),
+    name: col.string(),
+  }),
 })
 ```
 
@@ -100,10 +115,13 @@ Full Knex API: https://knexjs.org/guide/query-builder.html
 Enable caching per-table with the `caching` option (value = TTL in ms):
 
 ```typescript
-export default new Table<MyEntity>({
+export default new Table({
   name: "my_entities",
   caching: 600_000, // cache results for 10 minutes
-  setup: (table) => { /* ... */ },
+  columns: (col) => ({
+    id: col.increments(),
+    name: col.string(),
+  }),
 })
 ```
 
@@ -122,55 +140,35 @@ await myEntitiesTable.cache.set(
 )
 ```
 
-## Knex column type reference
+## Column types reference (`col.*`)
 
 ```typescript
-// Numeric
-table.increments("id")        // auto-increment INTEGER PK
-table.integer("count")        // INTEGER
-table.bigInteger("discord_id") // BIGINT (use string in TS interface for Discord IDs)
-table.float("ratio")          // FLOAT
-table.decimal("amount", 10, 2) // DECIMAL
-
-// Text
-table.string("name")          // VARCHAR(255)
-table.string("name", 64)      // VARCHAR(64)
-table.text("content")         // TEXT
-
-// Boolean
-table.boolean("active")       // BOOLEAN / TINYINT(1)
-
-// Date/time
-table.timestamp("created_at") // TIMESTAMP
-table.date("birthday")        // DATE
-table.time("starts_at")       // TIME
-
-// Other
-table.json("metadata")        // JSON
-table.uuid("uuid")            // UUID
+col.increments()       // auto-increment integer PK
+col.bigIncrements()    // auto-increment bigint PK
+col.string()           // VARCHAR(255)
+col.text()             // TEXT
+col.integer()          // INTEGER
+col.bigInteger()       // BIGINT
+col.float()            // FLOAT
+col.decimal()          // DECIMAL
+col.boolean()          // BOOLEAN
+col.timestamp()        // TIMESTAMP
+col.date()             // DATE
+col.json()             // JSON
+col.uuid()             // UUID
+col.binary()           // BINARY
+col.enum(["a", "b"])   // ENUM
 
 // Modifiers (chainable)
-.notNullable()
-.nullable()
-.defaultTo(value)
-.unique()
-.unsigned()
-.index()
-.references("id").inTable("other_table").onDelete("cascade")
+.nullable()            // allows NULL (types as T | null)
+.defaultTo(value)      // default value
+.unique()              // UNIQUE constraint
+.primary()             // PRIMARY KEY
+.index()               // adds an index
+.references("id").inTable("other_table").onDelete("cascade")  // foreign key
 ```
 
-## TypeScript interface conventions
-
-```typescript
-export interface MyEntity {
-  id: number               // auto-increment PK
-  discord_id: string       // Discord snowflake IDs as strings (not number)
-  name: string             // notNullable column
-  description?: string     // nullable column (? makes it optional)
-  score: number            // has defaultTo() → always present
-  created_at: Date         // timestamp
-}
-```
+Types are auto-inferred from column definitions. Nullable columns (`col.x().nullable()`) produce `T | null`.
 
 ## Database configuration
 

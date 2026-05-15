@@ -28,6 +28,7 @@ src/
 │   ├── env.ts            # Env vars (Zod-validated)
 │   ├── listener.ts       # Event listener handler
 │   ├── logger.ts         # @ghom/logger
+│   ├── module.ts         # Module discovery and registration
 │   ├── pagination.ts     # Reaction-based pagination
 │   ├── slash.ts          # Slash command handler
 │   └── util.ts           # Utilities
@@ -37,7 +38,8 @@ src/
 ├── buttons/              # Button interaction handlers
 ├── cron/                 # Scheduled cron jobs
 ├── tables/               # Database table definitions
-└── namespaces/           # Shared utilities / middlewares
+├── namespaces/           # Shared utilities / middlewares
+└── modules/              # Self-contained feature modules (see Modules section)
 ```
 
 ### Path aliases (tsconfig + package.json `imports`)
@@ -50,6 +52,7 @@ src/
 | `#tables/*` | `src/tables/*` |
 | `#buttons/*` | `src/buttons/*` |
 | `#namespaces/*` | `src/namespaces/*` |
+| `#modules/*` | `src/modules/*` |
 | `#all` | re-exports everything |
 
 ---
@@ -286,26 +289,20 @@ Timezone is read from `BOT_TIMEZONE` env var.
 Uses `@ghom/orm` (Knex-based with SQLite3 by default).
 
 ```typescript
-import { Table } from "@ghom/orm"
+import { Table, col, migrate } from "@ghom/orm"
 
-export interface User {
-  id: number
-  username: string
-  score?: number
-}
-
-export default new Table<User>({
+export default new Table({
   name: "users",
   description: "Bot users",
   // priority: 1,       // higher = loads first
   // caching: 600_000,  // ms, enables built-in cache
-  setup: (table) => {
-    table.increments("id").primary()
-    table.string("username").notNullable()
-    table.integer("score").defaultTo(0)
-  },
+  columns: (col) => ({
+    id: col.increments(),
+    username: col.string().unique(),
+    score: col.integer().defaultTo(0),
+  }),
   migrations: {
-    1: (table) => table.boolean("is_premium").defaultTo(false),
+    1: migrate.addColumn("is_premium", col.boolean().defaultTo(false)),
   },
 })
 ```
@@ -353,6 +350,120 @@ export const requireAdmin = new Middleware(
   }
 )
 ```
+
+---
+
+## Modules (`src/modules/`)
+
+A module is a self-contained feature folder under `src/modules/<name>/` that can contain any combination of bot.ts elements. Modules are auto-discovered at boot time and their elements are loaded alongside the top-level ones.
+
+### Module registry (`modules.json`)
+
+Modules are toggled via `modules.json` at the project root:
+
+```json
+{
+  "keepDependencies": [],
+  "modules": {
+    "example": true,
+    "ai-assistant": true
+  }
+}
+```
+
+- `modules` — only entries set to `true` are loaded. New module directories are auto-added as enabled.
+- `keepDependencies` — dependency names that already existed in `package.json` before a module added them. The CLI records them on `enableModule` so they are never removed on `removeModule`.
+
+Manage modules with the CLI:
+
+```bash
+bot module install   # install from npm, git, or local path
+bot module enable    # enable a disabled module
+bot module disable   # disable an active module
+bot module remove    # permanently delete a module
+```
+
+### Module structure
+
+```
+src/modules/<name>/
+├── module.json       # Module metadata and dependencies
+├── README.md         # Module documentation
+├── *.ts              # Root files — exports are auto-dispatched by element type
+├── commands/         # Textual commands (same format as src/commands/)
+├── slash/            # Slash commands
+├── buttons/          # Button handlers
+├── listeners/        # Event listeners (category.event.ts)
+├── cron/             # Cron jobs
+├── tables/           # Database tables
+└── namespaces/       # Shared utilities (imported via #modules/<name>/namespaces/<file>)
+```
+
+Every subdirectory is optional — only include what the module needs. Files inside follow the exact same patterns as their top-level counterparts.
+
+### Root files
+
+TypeScript files placed directly in the module root (not in subdirectories) are automatically imported. All their exports are inspected and dispatched to the correct handler based on each element's `type` property (`"command"`, `"slash"`, `"button"`, `"listener"`, `"cron"`, `"table"`). This lets you group related elements in a single file:
+
+```typescript
+// src/modules/my-module/setup.ts
+import { SlashCommand } from "#core/slash"
+import { Listener } from "#core/listener"
+
+export const myCommand = new SlashCommand({
+  name: "greet",
+  description: "Greet someone",
+  async run(interaction) {
+    await interaction.reply("Hello!")
+  },
+})
+
+export const myListener = new Listener({
+  event: "guildMemberAdd",
+  description: "Welcome new members",
+  async run(member) {
+    await member.guild.systemChannel?.send(`Welcome ${member}!`)
+  },
+})
+```
+
+Non-element exports (plain objects, functions, types) are silently ignored.
+
+### `module.json`
+
+Each module can have a `module.json` that declares its npm dependencies:
+
+```json
+{
+  "name": "my-module",
+  "description": "What this module does",
+  "dependencies": {
+    "some-package": "^1.0.0"
+  }
+}
+```
+
+The CLI reads this when enabling a module and adds missing dependencies to `package.json`.
+
+### Creating a module
+
+1. Create a folder: `src/modules/<name>/`
+2. Add a `module.json` with dependencies (if any)
+3. Add element subdirectories or root files as needed
+4. The framework auto-discovers and loads them at boot
+
+### Importing from a module
+
+Use the `#modules/*` path alias:
+
+```typescript
+import { greet } from "#modules/my-module/namespaces/helpers"
+```
+
+### Built-in modules
+
+- `src/modules/example/` — reference module with one element of each type
+- `src/modules/ai-assistant/` — AI-powered assistant (see its README for setup)
 
 ---
 

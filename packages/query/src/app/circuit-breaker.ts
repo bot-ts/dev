@@ -1,5 +1,5 @@
 import { CircuitOpenError } from "./errors.js"
-import { CircuitState, type CircuitBreakerOptions } from "./types.js"
+import { type CircuitBreakerOptions, CircuitState } from "./types.js"
 
 /**
  * Circuit breaker implementation for fault tolerance

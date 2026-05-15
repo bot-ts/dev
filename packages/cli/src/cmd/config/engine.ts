@@ -1,6 +1,6 @@
-import { isBotTsProject, loader, promptEngine, setupEngine } from "#src/util"
-import { Command } from "commander"
 import { confirm } from "@inquirer/prompts"
+import { Command } from "commander"
+import { isBotTsProject, loader, promptEngine, setupEngine } from "#src/util"
 
 export const handler = async () => {
   if (!isBotTsProject()) return process.exit(1)
@@ -16,7 +16,7 @@ export const handler = async () => {
   await loader(
     "Updating engine",
     () => setupEngine(engine, { setupDocker }),
-    "Updated engine"
+    "Updated engine",
   )
 
   console.log()
@@ -25,7 +25,7 @@ export const handler = async () => {
 
 export const command = new Command("engine")
   .description(
-    "Set the engine for the project\nMore info: https://ghom.gitbook.io/bot.ts/configuration#switch-engine"
+    "Set the engine for the project\nMore info: https://ghom.gitbook.io/bot.ts/configuration#switch-engine",
   )
   .usage("[--options]")
   .action(handler)

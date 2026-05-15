@@ -22,7 +22,8 @@ src/
 ├── buttons/          # Button interaction handlers
 ├── cron/             # Scheduled cron jobs
 ├── tables/           # Database table definitions (@ghom/orm)
-└── namespaces/       # Shared utilities, constants, middlewares
+├── namespaces/       # Shared utilities, constants, middlewares
+└── modules/          # Self-contained feature modules (auto-discovered)
 ```
 
 ## Path aliases — always use these, never relative imports into src/core
@@ -40,6 +41,7 @@ src/
 | `#tables/*` | `src/tables/*` |
 | `#buttons/*` | `src/buttons/*` |
 | `#namespaces/*` | `src/namespaces/*` |
+| `#modules/*` | `src/modules/*` |
 | `#all` | re-exports all core modules |
 
 ## Native files rule

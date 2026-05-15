@@ -1,3 +1,10 @@
+import fs from "node:fs"
+import path from "node:path"
+import { styleText } from "node:util"
+import { confirm, input, number, select } from "@inquirer/prompts"
+import { Command } from "commander"
+import ejs from "ejs"
+import type { PackageJson } from "types-package-json"
 import {
   capitalize,
   cwd,
@@ -7,13 +14,6 @@ import {
   isBotTsProject,
   readJSON,
 } from "#src/util"
-import { confirm, input, number, select } from "@inquirer/prompts"
-import { Command } from "commander"
-import ejs from "ejs"
-import fs from "node:fs"
-import path from "node:path"
-import { styleText } from "node:util"
-import { PackageJson } from "types-package-json"
 
 const TYPES = [
   "string",
@@ -36,8 +36,8 @@ export const handler = async () => {
     console.error(
       styleText(
         "red",
-        "No database is configured. Please run `bot config database` first."
-      )
+        "No database is configured. Please run `bot config database` first.",
+      ),
     )
     return process.exit(1)
   }
@@ -51,7 +51,7 @@ export const handler = async () => {
   const priority = await number({
     message: `Enter the computing priority for relations ${styleText(
       "grey",
-      "(higher is computed first)"
+      "(higher is computed first)",
     )}`,
     default: 0,
   })
@@ -113,7 +113,7 @@ export const handler = async () => {
           message: "Enter the related table name",
           required: true,
           async validate(value) {
-            if (!fs.existsSync(cwd("src", "tables", value + ".ts"))) {
+            if (!fs.existsSync(cwd("src", "tables", `${value}.ts`))) {
               return `Table ${value} does not exist`
             }
 
@@ -126,7 +126,7 @@ export const handler = async () => {
         const tableColumn = await input({
           message: `Enter the related ${styleText(
             "blueBright",
-            tableName
+            tableName,
           )}'s column name`,
           required: true,
         })
@@ -136,14 +136,14 @@ export const handler = async () => {
         const typeFn = await select({
           message: `Enter the related ${styleText(
             "blueBright",
-            tableName + "." + tableColumn
+            `${tableName}.${tableColumn}`,
           )}'s type`,
           choices: TYPES.map((t) => ({ name: t, value: t })),
           default: "integer",
         })
 
         const name = await inputName("Enter the relation name", {
-          defaultValue: tableName + "_" + tableColumn,
+          defaultValue: `${tableName}_${tableColumn}`,
           column: true,
         })
 
@@ -205,7 +205,7 @@ export const handler = async () => {
   }
 
   const template = fs.readFileSync(cwd("templates", "table.ejs"), "utf8")
-  const buttonPath = ["src", "tables", name + ".ts"]
+  const buttonPath = ["src", "tables", `${name}.ts`]
 
   fs.writeFileSync(
     cwd(...buttonPath),
@@ -216,23 +216,23 @@ export const handler = async () => {
         description,
         priority,
         columns,
-      })
+      }),
     ),
-    "utf8"
+    "utf8",
   )
 
   console.log()
   console.log(
     `✅ Table ${styleText("blueBright", name)} has been created at ${styleText(
       "cyanBright",
-      path.join(...buttonPath)
-    )}`
+      path.join(...buttonPath),
+    )}`,
   )
 }
 
 export const command = new Command("table")
   .description(
-    "Add a database table\nMore info: https://ghom.gitbook.io/bot.ts/usage/use-database#create-a-table"
+    "Add a database table\nMore info: https://ghom.gitbook.io/bot.ts/usage/use-database#create-a-table",
   )
   .usage("[--options]")
   .action(handler)

@@ -120,7 +120,7 @@ export class ThrottledQuery<Params extends unknown[], Result> {
    * Reset all state
    */
   reset(): void {
-    for (const [key, state] of this._state) {
+    for (const [_key, state] of this._state) {
       if (state.timer) {
         clearTimeout(state.timer)
       }
@@ -150,7 +150,7 @@ export class ThrottledQuery<Params extends unknown[], Result> {
   }
 
   private async _executeRequest(
-    key: string,
+    _key: string,
     state: ThrottleState<Result>,
     params: Params,
     resolve: (value: Result) => void,

@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { BatchHandler, createDataLoader } from "../src/app/batching"
 
 describe("BatchHandler", () => {
@@ -155,8 +155,12 @@ describe("BatchHandler", () => {
 
     expect(results[0].status).toBe("rejected")
     expect(results[1].status).toBe("rejected")
-    expect((results[0] as PromiseRejectedResult).reason.message).toBe("batch failed")
-    expect((results[1] as PromiseRejectedResult).reason.message).toBe("batch failed")
+    expect((results[0] as PromiseRejectedResult).reason.message).toBe(
+      "batch failed",
+    )
+    expect((results[1] as PromiseRejectedResult).reason.message).toBe(
+      "batch failed",
+    )
   })
 
   test("should reject if batch function returns wrong count", async () => {
@@ -174,7 +178,9 @@ describe("BatchHandler", () => {
 
     for (const result of results) {
       expect(result.status).toBe("rejected")
-      expect((result as PromiseRejectedResult).reason.message).toContain("returned 1 results for 3 items")
+      expect((result as PromiseRejectedResult).reason.message).toContain(
+        "returned 1 results for 3 items",
+      )
     }
   })
 })
@@ -187,7 +193,7 @@ describe("createDataLoader", () => {
         batchCalls++
         return ids.map((id) => ({ id, name: `User ${id}` }))
       },
-      { maxSize: 10, maxWait: 50 }
+      { maxSize: 10, maxWait: 50 },
     )
 
     const [user1, user2, user3] = await Promise.all([
@@ -204,7 +210,7 @@ describe("createDataLoader", () => {
 
   test("should use default options", async () => {
     const loadUser = createDataLoader(async (ids: string[]) =>
-      ids.map((id) => id.toUpperCase())
+      ids.map((id) => id.toUpperCase()),
     )
 
     const result = await loadUser("test")

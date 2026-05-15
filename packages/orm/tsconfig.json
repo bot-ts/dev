@@ -9,7 +9,9 @@
     "esModuleInterop": true,
     "declaration": true,
     "skipLibCheck": true,
-    "typeRoots": ["./node_modules/@types", "./dist/typings"]
+    "typeRoots": ["./node_modules/@types", "./dist/typings"],
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "include": ["src/**/*", "dist/typings/**/*"],
   "exclude": ["tests/**/*"]

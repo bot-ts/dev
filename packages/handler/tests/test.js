@@ -1,5 +1,5 @@
-const path = require("path")
-const fs = require("fs")
+const path = require("node:path")
+const fs = require("node:fs")
 const { Handler } = require("../dist/index")
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -24,13 +24,13 @@ test("with files", (done) => {
     loader: async (filepath) => {
       return fs.promises.readFile(filepath, "utf8")
     },
-    onLoad: async (filepath, data) => {
+    onLoad: async (_filepath, data) => {
       expect(data).toBe(Loaded())
     },
-    onChange: async (filepath, data) => {
+    onChange: async (_filepath, data) => {
       expect(data).toBe("42")
     },
-    onRemove: async (filepath, data) => {
+    onRemove: async (_filepath, data) => {
       expect(data).toBe("42")
     },
   })

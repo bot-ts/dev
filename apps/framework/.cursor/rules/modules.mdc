@@ -1,0 +1,116 @@
+---
+description: Rules for creating and working with modules in bot.ts
+globs: ["src/modules/**/*.ts"]
+alwaysApply: false
+---
+
+# bot.ts Modules Rules
+
+A module is a self-contained feature folder under `src/modules/<name>/` that can contain any combination of bot.ts elements. Only modules enabled in `modules.json` (project root) are loaded at boot time.
+
+## Module registry
+
+`modules.json` at the project root controls which modules are active:
+
+```json
+{
+  "keepDependencies": [],
+  "modules": {
+    "example": true,
+    "ai-assistant": true
+  }
+}
+```
+
+- `modules` — only entries set to `true` are loaded. New directories are auto-added as enabled.
+- `keepDependencies` — deps that already existed in `package.json` before a module added them (never removed by the CLI).
+
+Use `bot module enable/disable/install/remove` to manage.
+
+## Module structure
+
+```
+src/modules/<name>/
+├── module.json       # Dependencies and metadata
+├── README.md         # Documentation
+├── *.ts              # Root files — exports auto-dispatched by element type
+├── commands/         # Textual commands (same as src/commands/)
+├── slash/            # Slash commands (same as src/slash/)
+├── buttons/          # Button handlers (same as src/buttons/)
+├── listeners/        # Event listeners (same as src/listeners/)
+├── cron/             # Cron jobs (same as src/cron/)
+├── tables/           # Database tables (same as src/tables/)
+└── namespaces/       # Shared utilities (imported via #modules/<name>/namespaces/<file>)
+```
+
+Every subdirectory is optional — only include what the module needs.
+
+## Root files
+
+`.ts` files at the module root are imported and all exports with a `type` property are dispatched to the matching handler. This allows grouping multiple elements in one file:
+
+```typescript
+// src/modules/my-module/setup.ts
+import { SlashCommand } from "#core/slash"
+import { Listener } from "#core/listener"
+
+export const greetCmd = new SlashCommand({
+  name: "greet",
+  description: "Greet someone",
+  async run(interaction) { await interaction.reply("Hello!") },
+})
+
+export const welcomeListener = new Listener({
+  event: "guildMemberAdd",
+  description: "Welcome new members",
+  async run(member) { await member.guild.systemChannel?.send(`Welcome ${member}!`) },
+})
+```
+
+Non-element exports are silently ignored.
+
+## module.json
+
+Declare module dependencies (used by `bot module enable/install` to add them to `package.json`):
+
+```json
+{
+  "name": "my-module",
+  "description": "What the module does",
+  "dependencies": { "some-package": "^1.0.0" }
+}
+```
+
+## Element file patterns
+
+Files inside subdirectories follow the **exact same patterns** as their top-level counterparts:
+
+```typescript
+// src/modules/leveling/commands/rank.ts
+import { Command } from "#core/command"
+
+export default new Command({
+  name: "rank",
+  description: "Show your level",
+  channelType: "guild",
+  async run(message) {
+    await message.channel.send(`Level for ${message.author}`)
+  },
+})
+```
+
+## Importing module utilities
+
+Use the `#modules/*` path alias:
+
+```typescript
+import { greet } from "#modules/leveling/namespaces/helpers"
+```
+
+## Key constraints
+
+- Module name must be kebab-case (e.g. `leveling`, `mod-tools`)
+- Element names must be globally unique (a module command cannot have the same name as a top-level command)
+- Listener files still use `category.event.ts` naming
+- `.native.ts` override pattern works the same way inside modules
+- Built-in modules: `example` (reference), `ai-assistant` (AI-powered bot management)

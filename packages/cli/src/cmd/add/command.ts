@@ -1,10 +1,10 @@
-import { cwd, format, inputName, isBotTsProject } from "#src/util"
-import { confirm, input, select } from "@inquirer/prompts"
-import { Command } from "commander"
-import ejs from "ejs"
 import fs from "node:fs"
 import path from "node:path"
 import { styleText } from "node:util"
+import { confirm, input, select } from "@inquirer/prompts"
+import { Command } from "commander"
+import ejs from "ejs"
+import { cwd, format, inputName, isBotTsProject } from "#src/util"
 
 export const handler = async () => {
   if (!isBotTsProject()) return process.exit(1)
@@ -31,7 +31,7 @@ export const handler = async () => {
   })
 
   const template = fs.readFileSync(cwd("templates", "command.ejs"), "utf8")
-  const commandPath = ["src", "commands", name + ".ts"]
+  const commandPath = ["src", "commands", `${name}.ts`]
 
   fs.writeFileSync(
     cwd(...commandPath),
@@ -41,26 +41,26 @@ export const handler = async () => {
         description,
         channelType,
         botOwnerOnly,
-      })
+      }),
     ),
-    "utf8"
+    "utf8",
   )
 
   console.log()
   console.log(
     `✅ Command ${styleText(
       "blueBright",
-      name
+      name,
     )} has been created at ${styleText(
       "cyanBright",
-      path.join(...commandPath)
-    )}`
+      path.join(...commandPath),
+    )}`,
   )
 }
 
 export const command = new Command("command")
   .description(
-    "Add a command\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-command"
+    "Add a command\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-command",
   )
   .usage("[--options]")
   .action(handler)

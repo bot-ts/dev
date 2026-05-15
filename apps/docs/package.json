@@ -1,0 +1,16 @@
+{
+  "name": "@ghom/bot.ts-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Documentation for @ghom/bot.ts",
+  "scripts": {
+    "ci": "biome ci .",
+    "check": "biome check .",
+    "readme": "node update-readme.js",
+    "format": "biome check --write --unsafe ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.15",
+    "axios": "^1.6.0"
+  }
+}

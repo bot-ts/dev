@@ -1,14 +1,13 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { ThrottledQuery } from "../src/app/throttle"
 
 describe("ThrottledQuery", () => {
   test("should execute immediately on first call (leading edge)", async () => {
     let callCount = 0
-    const throttled = new ThrottledQuery(
-      async () => ++callCount,
-      100,
-      { leading: true, trailing: true }
-    )
+    const throttled = new ThrottledQuery(async () => ++callCount, 100, {
+      leading: true,
+      trailing: true,
+    })
 
     const result = await throttled.execute("test")
     expect(result).toBe(1)
@@ -16,11 +15,10 @@ describe("ThrottledQuery", () => {
 
   test("should throttle rapid calls", async () => {
     let callCount = 0
-    const throttled = new ThrottledQuery(
-      async () => ++callCount,
-      100,
-      { leading: true, trailing: true }
-    )
+    const throttled = new ThrottledQuery(async () => ++callCount, 100, {
+      leading: true,
+      trailing: true,
+    })
 
     // First call executes immediately
     const p1 = throttled.execute("test")
@@ -39,11 +37,10 @@ describe("ThrottledQuery", () => {
 
   test("should execute after interval passes", async () => {
     let callCount = 0
-    const throttled = new ThrottledQuery(
-      async () => ++callCount,
-      50,
-      { leading: true, trailing: true }
-    )
+    const throttled = new ThrottledQuery(async () => ++callCount, 50, {
+      leading: true,
+      trailing: true,
+    })
 
     await throttled.execute("test")
     await Bun.sleep(60)
@@ -54,11 +51,10 @@ describe("ThrottledQuery", () => {
 
   test("should cancel pending calls", async () => {
     let callCount = 0
-    const throttled = new ThrottledQuery(
-      async () => ++callCount,
-      100,
-      { leading: false, trailing: true }
-    )
+    const throttled = new ThrottledQuery(async () => ++callCount, 100, {
+      leading: false,
+      trailing: true,
+    })
 
     const promise = throttled.execute("test")
     throttled.cancel("test")
@@ -69,13 +65,12 @@ describe("ThrottledQuery", () => {
 
   test("should flush pending calls", async () => {
     let callCount = 0
-    const throttled = new ThrottledQuery(
-      async () => ++callCount,
-      1000,
-      { leading: false, trailing: true }
-    )
+    const throttled = new ThrottledQuery(async () => ++callCount, 1000, {
+      leading: false,
+      trailing: true,
+    })
 
-    const promise = throttled.execute("test")
+    const _promise = throttled.execute("test")
     await throttled.flush("test")
 
     expect(callCount).toBe(1)
@@ -89,7 +84,7 @@ describe("ThrottledQuery", () => {
         return id
       },
       100,
-      { leading: true, trailing: true }
+      { leading: true, trailing: true },
     )
 
     const [a, b] = await Promise.all([
@@ -104,22 +99,19 @@ describe("ThrottledQuery", () => {
   })
 
   test("should return last result", async () => {
-    const throttled = new ThrottledQuery(
-      async (val: number) => val * 2,
-      100,
-      { leading: true }
-    )
+    const throttled = new ThrottledQuery(async (val: number) => val * 2, 100, {
+      leading: true,
+    })
 
     await throttled.execute("test", 5)
     expect(throttled.getLastResult("test")).toBe(10)
   })
 
   test("should check for pending calls", async () => {
-    const throttled = new ThrottledQuery(
-      async () => "result",
-      100,
-      { leading: false, trailing: true }
-    )
+    const throttled = new ThrottledQuery(async () => "result", 100, {
+      leading: false,
+      trailing: true,
+    })
 
     expect(throttled.hasPending("test")).toBe(false)
 
@@ -132,11 +124,10 @@ describe("ThrottledQuery", () => {
   })
 
   test("should reset all state", async () => {
-    const throttled = new ThrottledQuery(
-      async () => "result",
-      100,
-      { leading: false, trailing: true }
-    )
+    const throttled = new ThrottledQuery(async () => "result", 100, {
+      leading: false,
+      trailing: true,
+    })
 
     const p1 = throttled.execute("a")
     const p2 = throttled.execute("b")

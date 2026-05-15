@@ -1,47 +1,49 @@
 // Main Query class
-export { Query, createQuery } from "./app/query.js"
 
-// Types
-export type {
-  QueryFn,
-  QueryOptions,
-  QueryStats,
-  CacheOptions,
-  ThrottleOptions,
-  RetryOptions,
-  DebounceOptions,
-  CircuitBreakerOptions,
-  BatchOptions,
-} from "./app/types.js"
-export { CircuitState, defaultKeyFn } from "./app/types.js"
-
+export { BatchHandler, createDataLoader } from "./app/batching.js"
 // Individual handlers for advanced usage
-export { CachedQuery, type CacheEntry, type CachedQueryOptions } from "./app/caching.js"
-export { ThrottledQuery } from "./app/throttle.js"
 export {
-  RetryHandler,
-  exponentialBackoff,
-  linearBackoff,
-  constantDelay,
-  jitteredBackoff,
-  isRetryableError,
-} from "./app/retry.js"
+  CachedQuery,
+  type CachedQueryOptions,
+  type CacheEntry,
+} from "./app/caching.js"
+export { CircuitBreaker } from "./app/circuit-breaker.js"
 export { DebounceHandler } from "./app/debounce.js"
 export { DedupHandler } from "./app/dedup.js"
-export { CircuitBreaker } from "./app/circuit-breaker.js"
-export {
-  TimeoutHandler,
-  withTimeout,
-  createTimeoutController,
-  fetchWithTimeout,
-} from "./app/timeout.js"
-export { BatchHandler, createDataLoader } from "./app/batching.js"
-
 // Errors
 export {
-  QueryError,
-  QueryTimeoutError,
   CircuitOpenError,
   MaxRetriesExceededError,
   QueryAbortedError,
+  QueryError,
+  QueryTimeoutError,
 } from "./app/errors.js"
+export { createQuery, Query } from "./app/query.js"
+export {
+  constantDelay,
+  exponentialBackoff,
+  isRetryableError,
+  jitteredBackoff,
+  linearBackoff,
+  RetryHandler,
+} from "./app/retry.js"
+export { ThrottledQuery } from "./app/throttle.js"
+export {
+  createTimeoutController,
+  fetchWithTimeout,
+  TimeoutHandler,
+  withTimeout,
+} from "./app/timeout.js"
+// Types
+export type {
+  BatchOptions,
+  CacheOptions,
+  CircuitBreakerOptions,
+  DebounceOptions,
+  QueryFn,
+  QueryOptions,
+  QueryStats,
+  RetryOptions,
+  ThrottleOptions,
+} from "./app/types.js"
+export { CircuitState, defaultKeyFn } from "./app/types.js"

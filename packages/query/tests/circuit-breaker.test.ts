@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { CircuitBreaker } from "../src/app/circuit-breaker"
 import { CircuitOpenError } from "../src/app/errors"
 import { CircuitState } from "../src/app/types"
@@ -107,11 +107,21 @@ describe("CircuitBreaker", () => {
     expect(result).toBe("success")
 
     // Fail twice to open
-    await breaker.execute(async () => { throw new Error("fail") }).catch(() => {})
-    await breaker.execute(async () => { throw new Error("fail") }).catch(() => {})
+    await breaker
+      .execute(async () => {
+        throw new Error("fail")
+      })
+      .catch(() => {})
+    await breaker
+      .execute(async () => {
+        throw new Error("fail")
+      })
+      .catch(() => {})
 
     // Should be open now
-    await expect(breaker.execute(async () => "success")).rejects.toThrow(CircuitOpenError)
+    await expect(breaker.execute(async () => "success")).rejects.toThrow(
+      CircuitOpenError,
+    )
   })
 
   test("should manually reset the circuit", () => {

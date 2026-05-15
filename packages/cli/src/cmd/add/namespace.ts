@@ -1,10 +1,10 @@
-import { cwd, format, inputName, isBotTsProject } from "#src/util"
-import { confirm } from "@inquirer/prompts"
-import { Command } from "commander"
-import ejs from "ejs"
 import fs from "node:fs"
 import path from "node:path"
 import { styleText } from "node:util"
+import { confirm } from "@inquirer/prompts"
+import { Command } from "commander"
+import ejs from "ejs"
+import { cwd, format, inputName, isBotTsProject } from "#src/util"
 
 export const handler = async () => {
   if (!isBotTsProject()) return process.exit(1)
@@ -17,29 +17,29 @@ export const handler = async () => {
   })
 
   const template = fs.readFileSync(cwd("templates", "namespace.ejs"), "utf8")
-  const namespacePath = ["src", "namespaces", name + ".ts"]
+  const namespacePath = ["src", "namespaces", `${name}.ts`]
 
   fs.writeFileSync(
     cwd(...namespacePath),
     format(ejs.compile(template)({ importCore })),
-    "utf8"
+    "utf8",
   )
 
   console.log()
   console.log(
     `✅ Namespace ${styleText(
       "blueBright",
-      name
+      name,
     )} has been created at ${styleText(
       "cyanBright",
-      path.join(...namespacePath)
-    )}`
+      path.join(...namespacePath),
+    )}`,
   )
 }
 
 export const command = new Command("namespace")
   .description(
-    "Add a namespace\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-namespace"
+    "Add a namespace\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-namespace",
   )
   .usage("[--options]")
   .action(handler)

@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test"
-import { Query, createQuery } from "../src/app/query"
-import { QueryTimeoutError, CircuitOpenError } from "../src/app/errors"
+import { describe, expect, test } from "bun:test"
+import { CircuitOpenError, QueryTimeoutError } from "../src/app/errors"
+import { createQuery, Query } from "../src/app/query"
 import { CircuitState } from "../src/app/types"
 
 describe("Query", () => {
@@ -52,7 +52,7 @@ describe("Query", () => {
           onError: (error) => {
             callbackError = error
           },
-        }
+        },
       )
 
       await query.execute().catch(() => {})
@@ -65,10 +65,7 @@ describe("Query", () => {
   describe("Caching", () => {
     test("should cache results", async () => {
       let callCount = 0
-      const query = new Query(
-        async () => ++callCount,
-        { cache: { ttl: 1000 } }
-      )
+      const query = new Query(async () => ++callCount, { cache: { ttl: 1000 } })
 
       const first = await query.execute()
       const second = await query.execute()
@@ -92,10 +89,7 @@ describe("Query", () => {
 
     test("should invalidate cache", async () => {
       let callCount = 0
-      const query = new Query(
-        async () => ++callCount,
-        { cache: { ttl: 1000 } }
-      )
+      const query = new Query(async () => ++callCount, { cache: { ttl: 1000 } })
 
       await query.execute()
       query.invalidateCache()
@@ -106,10 +100,7 @@ describe("Query", () => {
 
     test("should force fetch bypassing cache", async () => {
       let callCount = 0
-      const query = new Query(
-        async () => ++callCount,
-        { cache: { ttl: 1000 } }
-      )
+      const query = new Query(async () => ++callCount, { cache: { ttl: 1000 } })
 
       await query.execute()
       const forced = await query.fetch()
@@ -132,7 +123,7 @@ describe("Query", () => {
           await Bun.sleep(50)
           return "result"
         },
-        { dedup: true }
+        { dedup: true },
       )
 
       const [r1, r2, r3] = await Promise.all([
@@ -153,7 +144,7 @@ describe("Query", () => {
           await Bun.sleep(20)
           return "result"
         },
-        { dedup: true }
+        { dedup: true },
       )
 
       await Promise.all([query.execute(), query.execute(), query.execute()])
@@ -172,7 +163,7 @@ describe("Query", () => {
           if (attempts < 3) throw new Error("fail")
           return "success"
         },
-        { retry: { attempts: 3, delay: 10 } }
+        { retry: { attempts: 3, delay: 10 } },
       )
 
       const result = await query.execute()
@@ -192,7 +183,7 @@ describe("Query", () => {
         {
           cache: { ttl: 1000 },
           retry: { attempts: 3, delay: 10 },
-        }
+        },
       )
 
       const result = await query.execute()
@@ -213,7 +204,7 @@ describe("Query", () => {
           await Bun.sleep(100)
           return "done"
         },
-        { timeout: 10 }
+        { timeout: 10 },
       )
 
       await expect(query.execute()).rejects.toThrow(QueryTimeoutError)
@@ -225,7 +216,7 @@ describe("Query", () => {
           await Bun.sleep(100)
           return "done"
         },
-        { timeout: 10 }
+        { timeout: 10 },
       )
 
       await query.execute().catch(() => {})
@@ -240,7 +231,7 @@ describe("Query", () => {
           await Bun.sleep(10)
           return "done"
         },
-        { timeout: 100 }
+        { timeout: 100 },
       )
 
       const result = await query.execute()
@@ -254,7 +245,7 @@ describe("Query", () => {
         async () => {
           throw new Error("fail")
         },
-        { circuitBreaker: { threshold: 2, resetTimeout: 100 } }
+        { circuitBreaker: { threshold: 2, resetTimeout: 100 } },
       )
 
       await query.execute().catch(() => {})
@@ -268,7 +259,7 @@ describe("Query", () => {
         async () => {
           throw new Error("fail")
         },
-        { circuitBreaker: { threshold: 1, resetTimeout: 100 } }
+        { circuitBreaker: { threshold: 1, resetTimeout: 100 } },
       )
 
       await query.execute().catch(() => {})
@@ -281,7 +272,7 @@ describe("Query", () => {
         async () => {
           throw new Error("fail")
         },
-        { circuitBreaker: { threshold: 1, resetTimeout: 100 } }
+        { circuitBreaker: { threshold: 1, resetTimeout: 100 } },
       )
 
       await query.execute().catch(() => {})
@@ -296,7 +287,7 @@ describe("Query", () => {
         async () => {
           throw new Error("fail")
         },
-        { circuitBreaker: { threshold: 1, resetTimeout: 100 } }
+        { circuitBreaker: { threshold: 1, resetTimeout: 100 } },
       )
 
       await query.execute().catch(() => {})
@@ -317,10 +308,9 @@ describe("Query", () => {
   describe("Throttle", () => {
     test("should throttle rapid calls", async () => {
       let callCount = 0
-      const query = new Query(
-        async () => ++callCount,
-        { throttle: { interval: 100, leading: true, trailing: false } }
-      )
+      const query = new Query(async () => ++callCount, {
+        throttle: { interval: 100, leading: true, trailing: false },
+      })
 
       const p1 = query.execute()
       const p2 = query.execute()
@@ -341,10 +331,9 @@ describe("Query", () => {
   describe("Debounce", () => {
     test("should debounce rapid calls", async () => {
       let callCount = 0
-      const query = new Query(
-        async () => ++callCount,
-        { debounce: { wait: 50 } }
-      )
+      const query = new Query(async () => ++callCount, {
+        debounce: { wait: 50 },
+      })
 
       const p1 = query.execute()
       const p2 = query.execute()
@@ -368,7 +357,7 @@ describe("Query", () => {
         {
           cache: { ttl: 1000 },
           keyFn: (user) => String(user.id),
-        }
+        },
       )
 
       await query.execute({ id: 1, name: "Alice" })
@@ -381,13 +370,10 @@ describe("Query", () => {
   describe("Reset", () => {
     test("should reset all state", async () => {
       let callCount = 0
-      const query = new Query(
-        async () => ++callCount,
-        {
-          cache: { ttl: 1000 },
-          circuitBreaker: { threshold: 5, resetTimeout: 1000 },
-        }
-      )
+      const query = new Query(async () => ++callCount, {
+        cache: { ttl: 1000 },
+        circuitBreaker: { threshold: 5, resetTimeout: 1000 },
+      })
 
       await query.execute()
       await query.execute()
@@ -409,10 +395,9 @@ describe("Query", () => {
   describe("Flush", () => {
     test("should flush pending debounced operations", async () => {
       let callCount = 0
-      const query = new Query(
-        async () => ++callCount,
-        { debounce: { wait: 1000 } }
-      )
+      const query = new Query(async () => ++callCount, {
+        debounce: { wait: 1000 },
+      })
 
       const promise = query.execute()
 

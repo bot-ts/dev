@@ -1,6 +1,6 @@
 {
   "name": "@ghom/bot.ts-cli",
-  "version": "9.1.1",
+  "version": "10.0.0",
   "description": "CLI for make Discord bots in TypeScript quickly with discord.js",
   "main": "bin/index.js",
   "bin": {
@@ -10,8 +10,10 @@
   "scripts": {
     "build": "rollup -c",
     "start": "bun run src/index.ts",
-    "format": "prettier --write src events.json update-readme.js",
-    "test": "bun run build && npm pack --pack-destination ./pack",
+    "ci": "biome ci src events.json",
+    "check": "biome check src events.json && tsc --noEmit",
+    "format": "biome check --write --unsafe src events.json",
+    "test": "bun run build && node -e \"require('fs').mkdirSync('pack',{recursive:true})\" && npm pack --pack-destination ./pack",
     "prepublishOnly": "bun run format && bun run build"
   },
   "imports": {
@@ -19,9 +21,6 @@
       "./src/*.ts",
       "./bin/*.js"
     ]
-  },
-  "prettier": {
-    "semi": false
   },
   "keywords": [
     "bot.ts",
@@ -41,27 +40,24 @@
   },
   "homepage": "https://ghom.gitbook.io/bot-ts/",
   "dependencies": {
+    "@biomejs/biome": "2.4.15",
     "@inquirer/prompts": "^7.1.0",
     "boxen": "=5.1.2",
     "commander": "^12.1.0",
-    "degit": "^2.8.4",
-    "discord-api-types": "^0.37.105",
+    "discord-api-types": "^0.38.40",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "figlet": "1.8.0",
     "loading-cli": "^1.1.0",
-    "prettier": "^2.6.2",
     "rimraf": "^6.0.1"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.1",
-    "@types/degit": "^2.8.6",
     "@types/ejs": "^3.1.5",
     "@types/figlet": "1.7.0",
-    "@types/prettier": "^2.7.3",
     "rollup": "^4.27.2",
     "types-package-json": "^2.0.39",
-    "typescript": "^5.6.3"
+    "typescript": "^6.0.3"
   },
   "engines": {
     "node": ">=22.x.x"

@@ -31,29 +31,31 @@
   "exports": {
     ".": {
       "bun": "./src/index.ts",
-      "types": "./dist/index.d.ts",
+      "types": "./src/index.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./src/index.ts",
   "files": [
     "dist",
     "src"
   ],
   "scripts": {
-    "format": "bunx biome format --write src tsconfig.json tests",
-    "build": "bunx rimraf dist && bunx tsc",
-    "test": "bunx tsc --noEmit && bun test",
+    "ci": "biome ci .",
+    "check": "biome check . && tsc --noEmit",
+    "format": "biome check --write --unsafe .",
+    "build": "rimraf dist .build.tsbuildinfo && tsc --tsBuildInfoFile .build.tsbuildinfo",
+    "test": "tsc --noEmit && bun test",
     "prepublishOnly": "bun run format && bun run build && bun run test"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.15",
     "@types/node": "^22.0.0",
-    "biome": "^0.3.3",
     "rimraf": "^6.0.1",
-    "typescript": "^5.2.2"
+    "typescript": "^6.0.3"
   },
   "engines": {
     "bun": ">=1.0.0",

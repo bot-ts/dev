@@ -1,6 +1,4 @@
-"use strict"
-
-import { logger, Logger, LoggerLevels } from "../"
+import { Logger, LoggerLevels } from "../"
 
 test("make logs", (done) => {
   const logger = new Logger({
@@ -8,8 +6,8 @@ test("make logs", (done) => {
       [LoggerLevels.ERROR]: () => {},
       [LoggerLevels.INFO]: () => {},
       [LoggerLevels.SUCCESS]: () => {},
-      [LoggerLevels.WARN]: () => {}
-    }
+      [LoggerLevels.WARN]: () => {},
+    },
   })
 
   logger.log("info log")
@@ -35,8 +33,8 @@ test("listen logs", (done) => {
       },
       [LoggerLevels.WARN]: (output) => {
         expect(output).toContain("warn log")
-      }
-    }
+      },
+    },
   })
 
   logger.log("info log")
@@ -63,8 +61,8 @@ test("section logs", (done) => {
       },
       [LoggerLevels.WARN]: (output) => {
         expect(output).toContain("bonjour")
-      }
-    }
+      },
+    },
   })
 
   logger.log("info log")
@@ -91,8 +89,8 @@ test("custom logs", (done) => {
       },
       [LoggerLevels.WARN]: (output) => {
         expect(output).toBe("")
-      }
-    }
+      },
+    },
   })
 
   logger.log("info log")

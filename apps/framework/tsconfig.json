@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"moduleResolution": "Node",
+		"moduleResolution": "bundler",
 		"rootDir": "./src",
 		"outDir": "./dist",
 		"module": "esnext",
@@ -8,6 +8,9 @@
 		"lib": ["ES2023"],
 		"strict": true,
 		"noEmit": true,
+		"incremental": true,
+		"types": ["node", "bun", "deno"],
+		"tsBuildInfoFile": ".tsbuildinfo",
 		"sourceMap": true,
 		"declaration": false,
 		"skipLibCheck": true,
@@ -25,6 +28,7 @@
 			"#tables/*": ["./src/tables/*"],
 			"#buttons/*": ["./src/buttons/*"],
 			"#namespaces/*": ["./src/namespaces/*"],
+			"#modules/*": ["./src/modules/*"],
 
 			"#all": ["./src/core/index.ts"]
 		}

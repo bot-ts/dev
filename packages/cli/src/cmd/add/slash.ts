@@ -1,10 +1,10 @@
-import { cwd, format, inputName, isBotTsProject } from "#src/util"
-import { confirm, input } from "@inquirer/prompts"
-import { Command } from "commander"
-import ejs from "ejs"
 import fs from "node:fs"
 import path from "node:path"
 import { styleText } from "node:util"
+import { confirm, input } from "@inquirer/prompts"
+import { Command } from "commander"
+import ejs from "ejs"
+import { cwd, format, inputName, isBotTsProject } from "#src/util"
 
 export const handler = async () => {
   if (!isBotTsProject()) return process.exit(1)
@@ -31,7 +31,7 @@ export const handler = async () => {
   })
 
   const template = fs.readFileSync(cwd("templates", "slash.ejs"), "utf8")
-  const slashPath = ["src", "slash", name + ".ts"]
+  const slashPath = ["src", "slash", `${name}.ts`]
 
   fs.writeFileSync(
     cwd(...slashPath),
@@ -42,23 +42,23 @@ export const handler = async () => {
         guildOnly,
         botOwnerOnly,
         withSubs,
-      })
+      }),
     ),
-    "utf8"
+    "utf8",
   )
 
   console.log()
   console.log(
     `✅ Slash command ${styleText(
       "blueBright",
-      name
-    )} has been created at ${styleText("cyanBright", path.join(...slashPath))}`
+      name,
+    )} has been created at ${styleText("cyanBright", path.join(...slashPath))}`,
   )
 }
 
 export const command = new Command("slash")
   .description(
-    "Add a slash command\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-command#slash-commands"
+    "Add a slash command\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-command#slash-commands",
   )
   .usage("[--options]")
   .action(handler)

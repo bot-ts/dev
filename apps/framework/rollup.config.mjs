@@ -82,5 +82,5 @@ export default {
     typescript(),
   ],
   preserveEntrySignatures: "strict",
-  external: [/node_modules/],
+  external: [/node_modules/, /^@ghom\//],
 }

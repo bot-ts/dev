@@ -1,10 +1,10 @@
-import { capitalize, cwd, format, inputName, isBotTsProject } from "#src/util"
-import { confirm, input, select } from "@inquirer/prompts"
-import { Command } from "commander"
-import ejs from "ejs"
 import fs from "node:fs"
 import path from "node:path"
 import { styleText } from "node:util"
+import { confirm, input, select } from "@inquirer/prompts"
+import { Command } from "commander"
+import ejs from "ejs"
+import { capitalize, cwd, format, inputName, isBotTsProject } from "#src/util"
 
 export const handler = async () => {
   if (!isBotTsProject()) return process.exit(1)
@@ -56,7 +56,7 @@ export const handler = async () => {
   }
 
   const template = fs.readFileSync(cwd("templates", "button.ejs"), "utf8")
-  const buttonPath = ["src", "buttons", name + ".ts"]
+  const buttonPath = ["src", "buttons", `${name}.ts`]
 
   fs.writeFileSync(
     cwd(...buttonPath),
@@ -67,23 +67,23 @@ export const handler = async () => {
         description,
         params,
         label,
-      })
+      }),
     ),
-    "utf8"
+    "utf8",
   )
 
   console.log()
   console.log(
     `✅ Button ${styleText("blueBright", name)} has been created at ${styleText(
       "cyanBright",
-      path.join(...buttonPath)
-    )}`
+      path.join(...buttonPath),
+    )}`,
   )
 }
 
 export const command = new Command("button")
   .description(
-    "Add a button\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-button"
+    "Add a button\nMore info: https://ghom.gitbook.io/bot.ts/usage/create-a-button",
   )
   .usage("[--options]")
   .action(handler)

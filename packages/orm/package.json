@@ -3,22 +3,35 @@
   "version": "2.1.2",
   "license": "MIT",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "description": "TypeScript KnexJS ORM & handler",
   "homepage": "https://github.com/GhomKrosmonaute/orm",
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts",
+      "types": "./src/index.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
-    "format": "biome format --write .",
-    "check": "biome check --write . && tsc --noEmit",
-    "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "format": "biome check --write --unsafe .",
+    "ci": "biome ci .",
+    "check": "biome check . && tsc --noEmit",
+    "build": "rimraf dist .build.tsbuildinfo && tsc -p tsconfig.build.json --tsBuildInfoFile .build.tsbuildinfo",
     "test": "bun test",
-    "prepublishOnly": "npm run check && npm run build && npm test"
+    "prepublishOnly": "bun run check && bun run build && bun test"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.13",
+    "@biomejs/biome": "2.4.15",
     "@types/bun": "^1.1.0",
     "rimraf": "^6.0.1",
-    "typescript": "^5.2.2"
+    "typescript": "^6.0.3"
   },
   "optionalDependencies": {
     "mysql2": "^3.6.2",
@@ -26,8 +39,8 @@
     "sqlite3": "^5.1.6"
   },
   "dependencies": {
-    "@ghom/handler": "^3.1.0",
-    "@ghom/query": "1.0.0",
+    "@ghom/handler": "workspace:*",
+    "@ghom/query": "workspace:*",
     "csv-parser": "^3.0.0",
     "json-2-csv": "^5.5.6",
     "knex": "^3.0.1"

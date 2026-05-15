@@ -6,7 +6,7 @@ import type { QueryFn, RetryOptions } from "./types.js"
  * Returns delay in ms: 1000, 2000, 4000, 8000, etc.
  */
 export function exponentialBackoff(attempt: number, baseDelay = 1000): number {
-  return Math.pow(2, attempt) * baseDelay
+  return 2 ** attempt * baseDelay
 }
 
 /**
@@ -148,7 +148,10 @@ export function isRetryableError(error: unknown): boolean {
     }
 
     // Rate limiting (usually retryable after delay)
-    if (message.includes("rate limit") || message.includes("too many requests")) {
+    if (
+      message.includes("rate limit") ||
+      message.includes("too many requests")
+    ) {
       return true
     }
   }
