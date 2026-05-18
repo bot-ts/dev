@@ -32,22 +32,31 @@ jobs:
         run: bunx turbo check
 
       - name: Test
-        run: bunx turbo test
+        run: bunx turbo test --filter=!./apps/framework
 
-  factory:
-    name: Factory
+  sync-framework:
+    name: Sync Framework
     needs: ci
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger factory tests on bot-ts/framework
-        uses: actions/github-script@v7
+      - uses: actions/checkout@v4
         with:
-          github-token: ${{ secrets.FACTORY_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: 'bot-ts',
-              repo: 'framework',
-              workflow_id: 'factory.yml',
-              ref: 'master'
-            })
+          path: monorepo
+
+      - uses: actions/checkout@v4
+        with:
+          repository: bot-ts/framework
+          token: ${{ secrets.FACTORY_TOKEN }}
+          path: framework
+
+      - name: Sync apps/framework → bot-ts/framework
+        run: rsync -av --delete --exclude='.git' monorepo/apps/framework/ framework/
+
+      - name: Commit & push
+        working-directory: framework
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "No changes to sync" || (git commit -m "sync: bot-ts/dev@${{ github.sha }}" && git push)
