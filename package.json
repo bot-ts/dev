@@ -19,6 +19,7 @@
     "check": "turbo check",
     "format": "turbo format",
     "test": "turbo test",
-    "ci": "turbo ci"
+    "ci": "turbo ci",
+    "cli": "cd packages/cli && bun run build && bun link"
   }
 }

@@ -1,7 +1,6 @@
 {
   "keepDependencies": [],
   "modules": {
-    "example": true,
     "ai-assistant": true
   }
 }
