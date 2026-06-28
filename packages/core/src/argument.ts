@@ -354,7 +354,7 @@ export function flag<const Name extends string>(
 }
 
 export function resolveGivenArgument(
-  parsedArgs: yargsParser.Arguments,
+  parsedArgs: ReturnType<typeof yargsParser>,
   arg: IOption | IFlag,
 ): {
   given: boolean

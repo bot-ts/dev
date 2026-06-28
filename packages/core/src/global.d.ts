@@ -1,0 +1,5 @@
+declare module "discord-eval.ts"
+declare module "yargs-parser"
+declare module "node-cron"
+declare module "tims"
+declare module "regex-parser"

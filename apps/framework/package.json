@@ -26,8 +26,8 @@
       "./dist/types.js"
     ],
     "#core/*": [
-      "./src/core/*.ts",
-      "./dist/core/*.js"
+      "./node_modules/@ghom/bot.ts-core/src/*.ts",
+      "./node_modules/@ghom/bot.ts-core/dist/*.js"
     ],
     "#tables/*": [
       "./src/tables/*.ts",
@@ -46,8 +46,8 @@
       "./dist/modules/*.js"
     ],
     "#all": [
-      "./src/core/index.ts",
-      "./dist/core/index.js"
+      "./node_modules/@ghom/bot.ts-core/src/index.ts",
+      "./node_modules/@ghom/bot.ts-core/dist/index.js"
     ]
   },
   "scripts": {
@@ -74,6 +74,7 @@
   },
   "homepage": "https://github.com/bot-ts/framework#readme",
   "dependencies": {
+    "@ghom/bot.ts-core": "workspace:*",
     "@ghom/handler": "workspace:*",
     "@ghom/logger": "workspace:*",
     "@ghom/orm": "workspace:*",

@@ -1,5 +1,3 @@
-import * as orm from "@ghom/orm"
+import { database } from "@ghom/bot.ts-core"
 
-const client = new orm.ORM(false)
-
-export default client
+export default database

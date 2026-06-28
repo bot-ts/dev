@@ -189,3 +189,100 @@ bot module install
 ```
 
 The CLI will ask for the source (npm package name, git URL, or local path), copy the module into `src/modules/`, and install its dependencies.
+
+---
+
+## Module Publishing Convention
+
+To maintain a consistent and standard community ecosystem, please follow these guidelines when creating and publishing modules.
+
+### 1. Naming Convention
+
+- **Official Modules**: Published under the `@ghom` scope with the prefix `@ghom/bot.ts-module-<name>` (e.g. `@ghom/bot.ts-module-ai-assistant`).
+- **Community Modules**: Use the prefix `bot.ts-module-<name>` (e.g. `bot.ts-module-tickets`) or publish under your own organization scope (e.g. `@my-org/bot.ts-module-moderation`).
+- **Kebab-Case**: Directory names and module names must always use `kebab-case`.
+
+### 2. NPM Package Structure
+
+To standardise development and publishing, custom modules are structured like standard NPM packages. During publication, all of the module's code files reside in a development `src/` directory, while metadata files remain at the root of the package.
+
+When a module is installed or updated via the CLI, the installer automatically fetches files from the `src/` directory of the published package and extracts them directly into the root of the local module folder (`src/modules/<name>/`) to be immediately readable by the host framework.
+
+An NPM-publishable module must look like this:
+
+```
+packages/modules/my-module/
+├── package.json         # Package configuration for NPM publishing
+├── module.json          # Module metadata for the bot.ts framework
+├── tsconfig.json        # TypeScript configuration extending the framework's
+├── README.md            # Documentation
+└── src/                 # Code files (copied directly to local module root on install)
+    ├── commands/        # Module commands (optional)
+    ├── slash/           # Module slash commands (optional)
+    └── namespaces/      # Module namespaces/helpers (optional)
+```
+
+#### The `package.json`
+
+This file is required to publish to NPM. Include a `"files"` array to explicitly pack only your module's root metadata files and the `src/` folder:
+
+```json
+{
+  "name": "bot.ts-module-my-module",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "description": "A community module for bot.ts",
+  "files": [
+    "package.json",
+    "module.json",
+    "tsconfig.json",
+    "README.md",
+    "src"
+  ]
+}
+```
+
+#### The `tsconfig.json`
+
+To align compiler rules with the framework, custom modules must import/extend the main project's `tsconfig.json` configuration:
+
+```json
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"]
+}
+```
+
+#### The `module.json`
+
+This file is read by the `bot.ts` framework. List the name of your module (which must match the directory name) and any of its package dependencies:
+
+```json
+{
+  "name": "my-module",
+  "description": "What this module does",
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
+```
+
+### 3. Publishing to NPM
+
+Simply publish your module as a standard npm package from your module's root directory:
+
+```bash
+npm publish --access public
+```
+
+Once published, any developer can install it instantly in their `bot.ts` project by running:
+
+```bash
+bot module install
+# Source: bot.ts-module-my-module
+# Name: my-module
+```

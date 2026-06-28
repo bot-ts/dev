@@ -15,6 +15,8 @@ const readyListeners = new discord.Collection<
   boolean
 >()
 
+const loadedListenerFilepaths = new Set<string>()
+
 export const listenerHandler = new handler.Handler<Listener<any>>(
   util.srcPath("listeners"),
   {
@@ -25,6 +27,9 @@ export const listenerHandler = new handler.Handler<Listener<any>>(
       throw new Error(`${filepath}: default export must be a Listener instance`)
     },
     onLoad: async (filepath, listener) => {
+      if (loadedListenerFilepaths.has(filepath)) return
+      loadedListenerFilepaths.add(filepath)
+
       if (listener.options.event === "clientReady")
         readyListeners.set(listener, false)
 

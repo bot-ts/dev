@@ -50,6 +50,7 @@ export const commands = new (class CommandCollection extends discord.Collection<
   }
 
   public add(command: ICommand) {
+    if (this.has(command.options.name)) return
     validateCommand(command)
     this.set(command.options.name, command)
   }
@@ -392,7 +393,7 @@ export async function prepareCommand(
   context?: {
     restPositional: string[]
     baseContent: string
-    parsedArgs: yargsParser.Arguments
+    parsedArgs: ReturnType<typeof yargsParser>
     key: string
   },
 ): Promise<util.SystemMessage | boolean> {

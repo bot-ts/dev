@@ -1,0 +1,23 @@
+{
+  "name": "@ghom/bot.ts-module-ai-assistant",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "description": "AI-powered assistant module for bot.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "package.json",
+    "module.json",
+    "tsconfig.json",
+    "README.md",
+    "src"
+  ],
+  "dependencies": {
+    "openai": "^4.80.0"
+  },
+  "devDependencies": {
+    "@ghom/bot.ts-core": "workspace:*"
+  }
+}

@@ -44,6 +44,7 @@ export const slashCommands = new (class extends discord.Collection<
   ISlashCommand
 > {
   add(command: ISlashCommand) {
+    if (this.has(command.options.name)) return
     validateSlashCommand(command)
     this.set(command.options.name, command)
   }

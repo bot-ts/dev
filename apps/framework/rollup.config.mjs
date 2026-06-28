@@ -9,6 +9,7 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
 
 // Fonction pour obtenir tous les fichiers d'un répertoire récursivement
 function getFiles(dir) {
+  if (!fs.existsSync(dir)) return []
   let files = []
   const items = fs.readdirSync(dir, { withFileTypes: true })
 
@@ -16,7 +17,7 @@ function getFiles(dir) {
     const fullPath = path.join(dir, item.name)
     if (item.isDirectory()) {
       files = files.concat(getFiles(fullPath))
-    } else if (item.isFile() && fullPath.endsWith(".ts")) {
+    } else if (item.isFile() && fullPath.endsWith(".ts") && !fullPath.endsWith(".d.ts")) {
       files.push(fullPath)
     }
   }
@@ -27,7 +28,6 @@ export default {
   input: [
     "src/index.ts",
     "src/index.test.ts",
-    getFiles("src/core"),
     getFiles("src/buttons"),
     getFiles("src/commands"),
     getFiles("src/listeners"),
@@ -59,11 +59,11 @@ export default {
         },
         {
           find: "#all",
-          replacement: path.resolve(__dirname, "src/core/index.ts"),
+          replacement: path.resolve(__dirname, "node_modules/@ghom/bot.ts-core/src/index.ts"),
         },
         {
           find: "#core",
-          replacement: path.resolve(__dirname, "src/core"),
+          replacement: path.resolve(__dirname, "node_modules/@ghom/bot.ts-core/src"),
         },
         {
           find: "#tables",

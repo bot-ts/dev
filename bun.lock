@@ -43,6 +43,7 @@
       "name": "@ghom/bot.ts",
       "version": "10.0.0-Chroma",
       "dependencies": {
+        "@ghom/bot.ts-core": "workspace:*",
         "@ghom/handler": "workspace:*",
         "@ghom/logger": "workspace:*",
         "@ghom/orm": "workspace:*",
@@ -162,6 +163,36 @@
         "typescript": "^6.0.3",
       },
     },
+    "packages/core": {
+      "name": "@ghom/bot.ts-core",
+      "version": "10.0.0",
+      "dependencies": {
+        "@discordjs/collection": "^1.5.3",
+        "@ghom/handler": "workspace:*",
+        "@ghom/logger": "workspace:*",
+        "@ghom/orm": "workspace:*",
+        "@types/node-cron": "^3.0.11",
+        "@types/yargs-parser": "^21.0.3",
+        "dayjs": "^1.11.13",
+        "discord-api-types": "^0.38.40",
+        "discord-eval.ts": "1.1.4",
+        "discord.js": "14.26.4",
+        "dotenv": "^16.5.0",
+        "node-cron": "^3.0.3",
+        "regex-parser": "^2.3.1",
+        "simple-git": "^3.27.0",
+        "tims": "^2.1.0",
+        "types-package-json": "^2.0.39",
+        "yargs-parser": "^21.1.1",
+        "zod": "^3.24.1",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "2.4.15",
+        "@types/bun": "^1.1.0",
+        "rimraf": "^6.0.1",
+        "typescript": "^6.0.3",
+      },
+    },
     "packages/event-emitter": {
       "name": "@ghom/event-emitter",
       "version": "1.2.1",
@@ -196,6 +227,16 @@
         "@biomejs/biome": "2.4.15",
         "rimraf": "^6.0.1",
         "typescript": "^6.0.3",
+      },
+    },
+    "packages/modules/ai-assistant": {
+      "name": "@ghom/bot.ts-module-ai-assistant",
+      "version": "1.0.0",
+      "dependencies": {
+        "openai": "^4.80.0",
+      },
+      "devDependencies": {
+        "@ghom/bot.ts-core": "workspace:*",
       },
     },
     "packages/orm": {
@@ -290,7 +331,11 @@
 
     "@ghom/bot.ts-cli": ["@ghom/bot.ts-cli@workspace:packages/cli"],
 
+    "@ghom/bot.ts-core": ["@ghom/bot.ts-core@workspace:packages/core"],
+
     "@ghom/bot.ts-docs": ["@ghom/bot.ts-docs@workspace:apps/docs"],
+
+    "@ghom/bot.ts-module-ai-assistant": ["@ghom/bot.ts-module-ai-assistant@workspace:packages/modules/ai-assistant"],
 
     "@ghom/event-emitter": ["@ghom/event-emitter@workspace:packages/event-emitter"],
 

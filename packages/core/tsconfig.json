@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "outDir": "dist",
+    "module": "esnext",
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "paths": {
+      "#config": ["../../apps/framework/src/config.ts"],
+      "#types": ["../../apps/framework/src/types.ts"],
+      "#core/*": ["./src/*"],
+      "#buttons/*": ["../../apps/framework/src/buttons/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["tests/**/*"]
+}

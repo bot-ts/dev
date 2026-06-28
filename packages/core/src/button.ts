@@ -28,6 +28,7 @@ export const buttons = new (class ButtonCollection extends discord.Collection<
   IButton
 > {
   add(button: IButton): this {
+    if (this.has(button.options.name)) return this
     this.validate(button)
     return this.set(button.options.name, button)
   }

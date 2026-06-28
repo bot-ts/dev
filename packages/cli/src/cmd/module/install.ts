@@ -10,6 +10,7 @@ import {
   isBotTsProject,
   loader,
   modulePath,
+  unpackNpmModule,
 } from "#src/util"
 
 export const handler = async () => {
@@ -50,7 +51,22 @@ export const handler = async () => {
 
     await loader(
       `Copying module from ${source}...`,
-      () => fs.cpSync(source, dest, { recursive: true }),
+      () => {
+        fs.mkdirSync(dest, { recursive: true })
+        const srcDir = path.join(source, "src")
+        if (fs.existsSync(srcDir)) {
+          fs.cpSync(srcDir, dest, { recursive: true })
+        } else {
+          fs.cpSync(source, dest, { recursive: true })
+        }
+        const filesToCopy = ["package.json", "module.json", "README.md"]
+        for (const file of filesToCopy) {
+          const srcFile = path.join(source, file)
+          if (fs.existsSync(srcFile)) {
+            fs.copyFileSync(srcFile, path.join(dest, file))
+          }
+        }
+      },
       `Module "${name}" copied`,
     )
 
@@ -67,12 +83,30 @@ export const handler = async () => {
     await loader(
       `Cloning module from ${source}...`,
       () => {
-        execSync(`git clone ${source} ${dest}`, {
+        const tmpDir = cwd(".tmp-module-clone")
+        if (fs.existsSync(tmpDir))
+          fs.rmSync(tmpDir, { recursive: true, force: true })
+
+        execSync(`git clone ${source} ${tmpDir}`, {
           stdio: ["ignore", "ignore", "pipe"],
         })
-        const gitDir = path.join(dest, ".git")
-        if (fs.existsSync(gitDir))
-          fs.rmSync(gitDir, { recursive: true, force: true })
+
+        fs.mkdirSync(dest, { recursive: true })
+        const srcDir = path.join(tmpDir, "src")
+        if (fs.existsSync(srcDir)) {
+          fs.cpSync(srcDir, dest, { recursive: true })
+        } else {
+          fs.cpSync(tmpDir, dest, { recursive: true })
+        }
+        const filesToCopy = ["package.json", "module.json", "README.md"]
+        for (const file of filesToCopy) {
+          const srcFile = path.join(tmpDir, file)
+          if (fs.existsSync(srcFile)) {
+            fs.copyFileSync(srcFile, path.join(dest, file))
+          }
+        }
+
+        fs.rmSync(tmpDir, { recursive: true, force: true })
       },
       `Module "${name}" cloned`,
     )
@@ -91,28 +125,19 @@ export const handler = async () => {
     await loader(
       `Installing npm package ${source}...`,
       () => {
-        execSync(
-          `npm pack ${source} --pack-destination ${cwd(".tmp-module")}`,
-          {
-            stdio: ["ignore", "ignore", "pipe"],
-          },
-        )
-        const tarball = fs
-          .readdirSync(cwd(".tmp-module"))
-          .find((f) => f.endsWith(".tgz"))
-        if (tarball) {
-          execSync(
-            `tar -xzf ${path.join(cwd(".tmp-module"), tarball)} -C ${cwd(".tmp-module")}`,
-            {
-              stdio: ["ignore", "ignore", "pipe"],
-            },
-          )
-          const packageDir = path.join(cwd(".tmp-module"), "package")
-          if (fs.existsSync(packageDir)) {
-            fs.cpSync(packageDir, dest, { recursive: true })
-          }
-          fs.rmSync(cwd(".tmp-module"), { recursive: true, force: true })
+        let packageName = source
+        let version = "latest"
+        if (source.includes("@") && !source.startsWith("@")) {
+          const parts = source.split("@")
+          version = parts.pop()!
+          packageName = parts.join("@")
+        } else if (source.startsWith("@") && source.slice(1).includes("@")) {
+          const parts = source.slice(1).split("@")
+          version = parts.pop()!
+          packageName = `@${parts.join("@")}`
         }
+
+        unpackNpmModule(packageName, version, dest)
       },
       `Module "${name}" installed from npm`,
     )

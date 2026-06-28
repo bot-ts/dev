@@ -1,9 +1,7 @@
 <% if (!client) { %>
-import * as orm from "@ghom/orm"
+import { database } from "@ghom/bot.ts-core"
 
-const client = new orm.ORM(false)
-
-export default client
+export default database
 <% } else { %>
 <% if (client === "sqlite3") { %>
 import fs from "node:fs"
@@ -16,7 +14,7 @@ import config from "#config"
 import env from "#core/env"
 import * as logger from "#core/logger"
 import * as util from "#core/util"
-import * as orm from "@ghom/orm"
+import { database } from "@ghom/bot.ts-core"
 
 <% if (client === "pg") { %>
 setTypeParsers()
@@ -26,7 +24,7 @@ const dataDirectory = util.rootPath("data")
 if (!fs.existsSync(dataDirectory)) fs.mkdirSync(dataDirectory)
 <% } %>
 
-const client = new orm.ORM({
+database.connect({
   tableLocation: util.srcPath("tables"),
   backups: {
     location: <% if (client === "sqlite3") { %>path.join(dataDirectory, "backups")<% } else { %>util.rootPath("data", "backups")<% } %>,
@@ -51,7 +49,7 @@ const client = new orm.ORM({
   caching: config.ormCaching,
 })
 
-export default client
+export default database
 
 <% if (client === "pg") { %>
 function setTypeParsers() {

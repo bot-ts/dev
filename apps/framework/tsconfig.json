@@ -7,13 +7,13 @@
 		"target": "ES2020",
 		"lib": ["ES2023"],
 		"strict": true,
+		"skipLibCheck": true,
 		"noEmit": true,
 		"incremental": true,
 		"types": ["node", "bun", "deno"],
 		"tsBuildInfoFile": ".tsbuildinfo",
 		"sourceMap": true,
 		"declaration": false,
-		"skipLibCheck": true,
 		"esModuleInterop": true,
 		"noImplicitOverride": true,
 		"allowImportingTsExtensions": false,
@@ -23,14 +23,14 @@
 			"#config": ["./src/config.ts"],
 			"#types": ["./src/types.ts"],
 
-			"#core/*": ["./src/core/*"],
+			"#core/*": ["./node_modules/@ghom/bot.ts-core/src/*"],
 
 			"#tables/*": ["./src/tables/*"],
 			"#buttons/*": ["./src/buttons/*"],
 			"#namespaces/*": ["./src/namespaces/*"],
 			"#modules/*": ["./src/modules/*"],
 
-			"#all": ["./src/core/index.ts"]
+			"#all": ["./node_modules/@ghom/bot.ts-core/src/index.ts"]
 		}
 	},
 	"include": ["src/**/*"]

@@ -150,6 +150,36 @@ export class ORM {
     )
   }
 
+  /**
+   * Late-bind configuration and connect an unconnected ORM instance.
+   */
+  public connect(config: ORMConfig) {
+    this.config = config
+    this._client = knex(
+      config.database ?? {
+        client: "sqlite3",
+        useNullAsDefault: true,
+        connection: {
+          filename: ":memory:",
+        },
+      },
+    )
+
+    this.handler = new Handler<Table<any>>(config.tableLocation, {
+      pattern: /\.[jt]s$/,
+      loader: async (filepath) => {
+        const file = await import(isCJS ? filepath : url.pathToFileURL(filepath).href)
+        if (file.default instanceof Table) return file.default
+        throw new Error(`${filepath}: default export must be a Table instance`)
+      },
+    })
+
+    this._rawCache = new CachedQuery(
+      async (raw: string) => await this.raw(raw),
+      config.caching ?? Infinity,
+    )
+  }
+
   private requireClient(): asserts this is ORM & {
     config: ORMConfig
     _client: Knex

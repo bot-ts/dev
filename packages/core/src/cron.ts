@@ -33,6 +33,7 @@ export const cronList = new (class CronCollection extends discord.Collection<
   Cron
 > {
   add(cron: Cron): this {
+    if (this.has(cron.options.name)) return this
     this.validate(cron)
     return this.set(cron.options.name, cron)
   }
@@ -66,7 +67,7 @@ export interface CronOptions {
 
 export class Cron {
   readonly type = "cron" as const
-  task?: cron.ScheduledTask
+  task?: ReturnType<typeof cron.schedule>
   native?: boolean
   filepath?: string
 

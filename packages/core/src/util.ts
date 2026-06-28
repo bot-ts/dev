@@ -47,11 +47,12 @@ export function relativeRootPath(..._path: string[]): string {
  * Make a path from the "src" (or "dist") folder (or dist if compiled) and return it
  */
 export function srcPath(..._path: string[]): string {
-  return path.join(getCurrentDirname(import.meta), "..", ..._path)
+  const isDist = !fs.existsSync(path.join(process.cwd(), "src"))
+  return path.join(process.cwd(), isDist ? "dist" : "src", ..._path)
 }
 
 export function rootPath(..._path: string[]): string {
-  return path.join(getCurrentDirname(import.meta), "..", "..", ..._path)
+  return path.join(process.cwd(), ..._path)
 }
 
 export const packageJSON = JSON.parse(
@@ -410,7 +411,7 @@ export function pick<T extends object, K extends keyof T>(
 /**
  * Simple cache for manage temporary values
  */
-export const cache = new (class Cache {
+class Cache {
   private data: { [key: string]: any } = {}
 
   get<T>(key: string): T | undefined {
@@ -433,7 +434,9 @@ export const cache = new (class Cache {
     }
     return value
   }
-})()
+}
+
+export const cache = new Cache()
 
 export function convertDistPathToSrc(path: string) {
   return path.replace(/dist([/\\])/, "src$1").replace(".js", ".ts")

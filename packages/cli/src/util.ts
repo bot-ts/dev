@@ -749,3 +749,55 @@ export async function setupWorkflow(
     "utf8",
   )
 }
+
+/**
+ * Downloads and unpacks an NPM package, extracting code files from src/ (or root if absent)
+ * and copying top-level metadata cleanly to the destination.
+ */
+export function unpackNpmModule(
+  packageName: string,
+  version: string,
+  destPath: string,
+) {
+  const tmpDir = cwd(`.tmp-module-${packageName.replace(/[^a-zA-Z0-9]/g, "-")}`)
+  if (fs.existsSync(tmpDir)) {
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+  }
+  fs.mkdirSync(tmpDir, { recursive: true })
+
+  try {
+    execSync(
+      `npm pack ${packageName}@${version} --pack-destination "${tmpDir}"`,
+      {
+        stdio: ["ignore", "ignore", "pipe"],
+      },
+    )
+    const tarball = fs.readdirSync(tmpDir).find((f) => f.endsWith(".tgz"))
+    if (tarball) {
+      execSync(`tar -xzf "${path.join(tmpDir, tarball)}" -C "${tmpDir}"`, {
+        stdio: ["ignore", "ignore", "pipe"],
+      })
+      const packageDir = path.join(tmpDir, "package")
+      if (fs.existsSync(packageDir)) {
+        fs.mkdirSync(destPath, { recursive: true })
+        const srcDir = path.join(packageDir, "src")
+        if (fs.existsSync(srcDir)) {
+          fs.cpSync(srcDir, destPath, { recursive: true })
+        } else {
+          fs.cpSync(packageDir, destPath, { recursive: true })
+        }
+        const filesToCopy = ["package.json", "module.json", "README.md"]
+        for (const file of filesToCopy) {
+          const srcFile = path.join(packageDir, file)
+          if (fs.existsSync(srcFile)) {
+            fs.copyFileSync(srcFile, path.join(destPath, file))
+          }
+        }
+      }
+    }
+  } finally {
+    if (fs.existsSync(tmpDir)) {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  }
+}
