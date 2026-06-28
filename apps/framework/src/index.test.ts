@@ -2,7 +2,7 @@
 
 process.env.BOT_MODE = "test"
 
-import * as core from "#all"
+const core = await import("#all")
 
 try {
   await core.moduleHandler.init()
@@ -21,3 +21,5 @@ try {
   core.error(error, "src/index.test.ts", true)
   process.exit(1)
 }
+
+export {}
