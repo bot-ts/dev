@@ -83,3 +83,53 @@ const handler = new Handler("dist/files", {
   },
 })
 ```
+
+## Advanced Features
+
+### 1. Additional Directories
+
+You can register extra directories to be scanned and processed together during `init()`. Note that `addDirectory` must be called **before** running `init()`:
+
+```ts
+handler.addDirectory("path/to/another/folder")
+await handler.init()
+```
+
+### 2. Late Loading
+
+If you need to scan and load files from an extra directory **after** `init()` has already completed (e.g., for dynamic sub-modules), use `loadFrom()`:
+
+```ts
+await handler.loadFrom("path/to/extra/files")
+```
+
+### 3. Programmatic Injection
+
+You can inject pre-loaded elements into the handler programmatically. This acts as if the element had been scanned directly from the disk, calling the `onLoad` callback immediately:
+
+```ts
+await handler.inject("virtual/path/file.ts", myLoadedElement, "optional-key")
+```
+
+### 4. Hook Lifecycle Callbacks
+
+The handler provides exhaustive lifecycle hooks to configure robust custom integrations:
+
+```ts
+const handler = new Handler("src/files", {
+  pattern: /\.ts$/,
+  loader: async (path) => import(path),
+  
+  // Called when a file is loaded for the first time
+  onLoad: async (path, element) => { ... },
+  
+  // Called when an already loaded file is modified (if omitted, falls back to onLoad)
+  onChange: async (path, element) => { ... },
+  
+  // Called when a file is deleted from disk during hot-reloading
+  onRemove: async (path, oldElement) => { ... },
+  
+  // Called after all files across scanned directories have been successfully processed
+  onFinish: async (elementsMap) => { ... }
+})
+```
