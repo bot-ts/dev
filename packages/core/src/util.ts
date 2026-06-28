@@ -789,7 +789,9 @@ export function createHandler<T>(
     hotReload: env.BOT_MODE === "development",
     loader: async (filepath) => {
       const isDev = env.BOT_MODE === "development"
-      const fileUrl = url.pathToFileURL(filepath).href + (isDev ? `?update=${Date.now()}` : "")
+      const fileUrl =
+        url.pathToFileURL(filepath).href +
+        (isDev ? `?update=${Date.now()}` : "")
       const file = await import(fileUrl)
       if (file.default instanceof options.expectedClass) return file.default
       throw new Error(
