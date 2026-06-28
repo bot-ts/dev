@@ -18,10 +18,11 @@ const __filename = util.getCurrentFilename(import.meta)
 
 export let defaultCommand: ICommand | null = null
 
-export const commands = new (class CommandCollection extends discord.Collection<
-  string,
-  ICommand
-> {
+export const commands = new (class CommandCollection extends util.ElementCollection<ICommand> {
+  constructor() {
+    super("Command")
+  }
+
   public resolve(key: string): ICommand | undefined {
     for (const [name, command] of this) {
       if (
@@ -32,10 +33,9 @@ export const commands = new (class CommandCollection extends discord.Collection<
     }
   }
 
-  public add(command: ICommand) {
-    if (this.has(command.options.name)) return
+  override validate(command: ICommand) {
+    super.validate(command)
     validateCommand(command)
-    this.set(command.options.name, command)
   }
 })()
 
@@ -979,5 +979,8 @@ export const commandHandler = util.createHandler<Command>({
   expectedClass: Command,
   onLoad: (filepath, command) => {
     commands.add(command)
+  },
+  onRemove: (filepath, command) => {
+    commands.delete(command.options.name)
   },
 })

@@ -6,20 +6,13 @@ import env from "#core/env"
 import * as logger from "#core/logger"
 import * as util from "#core/util"
 
-export const buttons = new (class ButtonCollection extends discord.Collection<
-  string,
-  IButton
-> {
-  add(button: IButton): this {
-    if (this.has(button.options.name)) return this
-    this.validate(button)
-    return this.set(button.options.name, button)
+export const buttons = new (class ButtonCollection extends util.ElementCollection<IButton> {
+  constructor() {
+    super("Button")
   }
 
-  validate(button: IButton): void | never {
-    if (this.has(button.options.name)) {
-      throw new Error(`Button key "${button.options.name}" is not unique.`)
-    }
+  override validate(button: IButton): void | never {
+    super.validate(button)
 
     util.validateCooldown(
       button.options.cooldown,
@@ -189,5 +182,8 @@ export const buttonHandler = util.createHandler<Button>({
   expectedClass: Button,
   onLoad: (filepath, button) => {
     buttons.add(button)
+  },
+  onRemove: (filepath, button) => {
+    buttons.delete(button.options.name)
   },
 })

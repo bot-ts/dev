@@ -16,6 +16,7 @@ const readyListeners = new discord.Collection<
 >()
 
 const loadedListenerFilepaths = new Set<string>()
+const boundListeners = new Map<string, { event: string, once: boolean, wrapper: (...args: any[]) => any }>()
 
 export interface MoreClientEvents {
   raw: [packet: apiTypes.GatewayDispatchPayload]
@@ -47,29 +48,37 @@ export const listenerHandler = util.createHandler<Listener<any>>({
     if (listener.options.event === "clientReady")
       readyListeners.set(listener as any, false)
 
+    const wrapper = async (...args: any[]) => {
+      try {
+        if (listener.options.once) {
+          await (listener.options as any).run(...args)
+        } else {
+          const run = (listener.options as any).run.bind(listener)
+          await run(...args)
+        }
+
+        if (listener.options.event === "clientReady") {
+          readyListeners.set(listener as any, true)
+
+          if (readyListeners.every((launched) => launched)) {
+            client.emit("afterReady", ...args)
+          }
+        }
+      } catch (error: any) {
+        logger.error(error, filepath, true)
+      }
+    }
+
     client[listener.options.once ? "once" : "on"](
       listener.options.event,
-      async (...args) => {
-        try {
-          if (listener.options.once) {
-            await (listener.options as any).run(...args)
-          } else {
-            const run = (listener.options as any).run.bind(listener)
-            await run(...args)
-          }
-
-          if (listener.options.event === "clientReady") {
-            readyListeners.set(listener as any, true)
-
-            if (readyListeners.every((launched) => launched)) {
-              client.emit("afterReady", ...args)
-            }
-          }
-        } catch (error: any) {
-          logger.error(error, filepath, true)
-        }
-      },
+      wrapper,
     )
+
+    boundListeners.set(filepath, {
+      event: listener.options.event,
+      once: !!listener.options.once,
+      wrapper,
+    })
 
     const isNative = /.native.[jt]s$/.test(filepath)
 
@@ -96,5 +105,13 @@ export const listenerHandler = util.createHandler<Listener<any>>({
         isNative ? ` ${styleText("green", "native")}` : ""
       } ${styleText("grey", listener.options.description)}`,
     )
+  },
+  onRemove: async (filepath, listener) => {
+    const bound = boundListeners.get(filepath)
+    if (bound) {
+      client.off(bound.event, bound.wrapper)
+      boundListeners.delete(filepath)
+      loadedListenerFilepaths.delete(filepath)
+    }
   },
 })

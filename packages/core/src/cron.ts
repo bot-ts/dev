@@ -14,17 +14,14 @@ export class CRON_Error extends Error {
   }
 }
 
-export const cronList = new (class CronCollection extends discord.Collection<
-  string,
-  Cron
-> {
-  add(cron: Cron): this {
-    if (this.has(cron.options.name)) return this
-    this.validate(cron)
-    return this.set(cron.options.name, cron)
+export const cronList = new (class CronCollection extends util.ElementCollection<Cron> {
+  constructor() {
+    super("Cron")
   }
 
-  validate(cron: Cron): void | never {
+  override validate(cron: Cron): void | never {
+    super.validate(cron)
+
     // cron has good format
     cronConfigToPattern(cron.options.schedule)
 
@@ -220,5 +217,9 @@ export const cronHandler = util.createHandler<Cron>({
   expectedClass: Cron,
   onLoad: (filepath, cron) => {
     cronList.add(cron)
+  },
+  onRemove: (filepath, cron) => {
+    cron.stop()
+    cronList.delete(cron.options.name)
   },
 })

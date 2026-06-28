@@ -20,14 +20,14 @@ export class SlashCommandError extends Error {
   }
 }
 
-export const slashCommands = new (class extends discord.Collection<
-  string,
-  ISlashCommand
-> {
-  add(command: ISlashCommand) {
-    if (this.has(command.options.name)) return
+export const slashCommands = new (class extends util.ElementCollection<ISlashCommand> {
+  constructor() {
+    super("SlashCommand")
+  }
+
+  override validate(command: ISlashCommand) {
+    super.validate(command)
     validateSlashCommand(command)
-    this.set(command.options.name, command)
   }
 })()
 
@@ -330,5 +330,8 @@ export const slashCommandHandler = util.createHandler<ISlashCommand>({
   expectedClass: SlashCommand,
   onLoad: (filepath, command) => {
     slashCommands.add(command)
+  },
+  onRemove: (filepath, command) => {
+    slashCommands.delete(command.options.name)
   },
 })

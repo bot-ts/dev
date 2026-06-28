@@ -738,6 +738,7 @@ export async function checkCooldown(
 }
 
 export const tsFilePattern = /\.[jt]s$/
+export const nativeTsFilePattern = /\.native\.[jt]s$/
 
 export function isTsFile(filename: string): boolean {
   return tsFilePattern.test(filename) && !filename.endsWith(".d.ts")
@@ -747,19 +748,45 @@ export function isTsFileEntry(entry: fs.Dirent): boolean {
   return entry.isFile() && isTsFile(entry.name)
 }
 
+export class ElementCollection<
+  T extends { options: { name: string } },
+> extends discord.Collection<string, T> {
+  constructor(public readonly typeName: string) {
+    super()
+  }
+
+  public add(element: T): this {
+    if (this.has(element.options.name)) {
+      return this.set(element.options.name, element)
+    }
+    this.validate(element)
+    return this.set(element.options.name, element)
+  }
+
+  public validate(element: T): void | never {
+    if (this.has(element.options.name)) {
+      throw new Error(
+        `${this.typeName} key "${element.options.name}" is not unique.`,
+      )
+    }
+  }
+}
+
 export interface HandlerOptions<T> {
   directory: string
   expectedClass: any
   onLoad?: (filepath: string, element: T) => void | Promise<void>
+  onRemove?: (filepath: string, element: T) => void | Promise<void>
 }
 
 export function createHandler<T>(
-  options: HandlerOptions<T>
+  options: HandlerOptions<T>,
 ): handler.Handler<T> {
   const className = options.expectedClass.name
 
   return new handler.Handler<T>(srcPath(options.directory), {
     pattern: tsFilePattern,
+    hotReload: env.BOT_MODE === "development",
     loader: async (filepath) => {
       const file = await import(url.pathToFileURL(filepath).href)
       if (file.default instanceof options.expectedClass) return file.default
@@ -767,10 +794,15 @@ export function createHandler<T>(
     },
     onLoad: async (filepath, element) => {
       const el = element as any
-      el.native = /.native.[jt]s$/.test(filepath)
+      el.native = nativeTsFilePattern.test(filepath)
       el.filepath = filepath
       if (options.onLoad) {
         await options.onLoad(filepath, element)
+      }
+    },
+    onRemove: async (filepath, element) => {
+      if (options.onRemove) {
+        await options.onRemove(filepath, element)
       }
     },
   })
