@@ -14,6 +14,113 @@
     ? `You can invite the bot via [this link](${invitation}) in your Discord server!`
     : "This bot is private and cannot be invited in other servers." %>
 
+## Getting Started
+
+Follow these instructions to get a copy of the bot up and running on your local machine.
+
+### Prerequisites
+
+This bot is configured to run with:
+- **Runtime**: `<%- runtime %>`
+- **Package Manager**: `<%- packageManager %>`
+
+Please ensure you have them installed on your local system.
+
+### 1. Installation
+
+Install all the required dependencies:
+```bash
+<%- resolveCommand("{install}") %>
+```
+
+### 2. Configuration & Discord App Token
+
+To connect your bot to Discord, you need an application token.
+
+1. Go to the [Discord Developer Portal](https://discord.com/developers/applications).
+2. Follow the [Discord.js App Setup Guide](https://discordjs.guide/legacy/preparations/app-setup) to create an application, add a bot user, and retrieve your **Bot Token**.
+3. Duplicate the `.env.example` (or `.template.env`) file and rename it to `.env` in the root directory.
+4. Set your token and other required environment variables in the `.env` file:
+   ```env
+   BOT_TOKEN="YOUR_DISCORD_BOT_TOKEN_HERE"
+   ```
+
+### 3. Running the Bot
+
+You can start, watch, and test the bot using the following commands:
+
+- **Start the bot**:
+  ```bash
+  <%- resolveCommand("{run} start") %>
+  ```
+- **Start the bot in watch mode** (auto-restart on file change):
+  ```bash
+  <%- resolveCommand("{run} watch") %>
+  ```
+- **Run the test suite**:
+  ```bash
+  <%- resolveCommand("{run} test") %>
+  ```
+
+---
+
+## Environment Variables
+
+You can easily add and enforce validation for your own custom environment variables:
+
+1. Add your custom variable in your local `.env` file:
+   ```env
+   MY_CUSTOM_API_KEY="your-api-key-here"
+   ```
+2. Open `src/config.ts` and add its validation schema to the `envSchema` property using `zod`:
+   ```typescript
+   export const config = new Config({
+     // ...
+     envSchema: z.object({
+       MY_CUSTOM_API_KEY: z.string(),
+     }),
+     // ...
+   })
+   ```
+3. Use it securely and with full TypeScript typing inside your code by importing it from the core module:
+   ```typescript
+   import env from "#core/env"
+
+   console.log(env.MY_CUSTOM_API_KEY) // Strongly-typed string!
+   ```
+
+---
+
+## Bot.ts Specific Commands
+
+You can use the `bot.ts` CLI commands to manage your project or use the package manager scripts. Here are some of the most useful commands:
+
+- **Add a new command**:
+  ```bash
+  # Recommended (runs the locally installed package)
+  <%- resolveCommand("{exec} @ghom/bot.ts-cli add command") %>
+
+  # Alternative (if the "bot" command is globally installed or in your PATH)
+  bot add command
+  ```
+- **Add other components** (buttons, listeners, slash commands, tables, etc.):
+  ```bash
+  # Recommended (runs the locally installed package)
+  <%- resolveCommand("{exec} @ghom/bot.ts-cli add <component-type>") %>
+
+  # Alternative (if the "bot" command is globally installed or in your PATH)
+  bot add <component-type>
+  ```
+  *(Component types: `slash`, `command`, `button`, `listener`, `cron`, `namespace`, `table`)*
+- **Update the framework**:
+  ```bash
+  <%- resolveCommand("{run} update") %>
+  ```
+- **Regenerate this README**:
+  ```bash
+  <%- resolveCommand("{run} readme") %>
+  ```
+
 ## Specifications
 
 You can find the documentation of bot.ts [here](https://ghom.gitbook.io/bot-ts/).  

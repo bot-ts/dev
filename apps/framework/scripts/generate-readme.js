@@ -51,6 +51,28 @@ const template = await fs.promises.readFile(
   rootDir("templates", "readme.ejs"),
   { encoding: "utf8" },
 )
+const compatibility = JSON.parse(
+  await fs.promises.readFile(rootDir("compatibility.json"), {
+    encoding: "utf8",
+  }),
+)
+
+const runtime = process.env.RUNTIME || "bun"
+const packageManager = process.env.PACKAGE_MANAGER || "bun"
+
+const resolveCommand = (templateStr) => {
+  return templateStr.replace(/{([a-z-]+)}/g, (_, tag) => {
+    const comp = compatibility.components[tag]
+    if (comp) {
+      if ("node" in comp) {
+        return comp[runtime]
+      } else {
+        return comp[packageManager]
+      }
+    }
+    return `{${tag}}`
+  })
+}
 
 /**
  * @param dirname {string}
@@ -106,6 +128,9 @@ const readme = ejs.compile(template)({
   buttons,
   packageJSON,
   client,
+  runtime,
+  packageManager,
+  resolveCommand,
 })
 
 await fs.promises.writeFile(
