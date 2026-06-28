@@ -6,23 +6,6 @@ import env from "#core/env"
 import * as logger from "#core/logger"
 import * as util from "#core/util"
 
-export const buttonHandler = new handler.Handler<IButton>(
-  util.srcPath("buttons"),
-  {
-    pattern: /\.[jt]s$/,
-    loader: async (filepath) => {
-      const file = await import(url.pathToFileURL(filepath).href)
-      if (file.default instanceof Button) return file.default
-      throw new Error(`${filepath}: default export must be a Button instance`)
-    },
-    onLoad: async (filepath, button) => {
-      button.native = /.native.[jt]s$/.test(filepath)
-      button.filepath = filepath
-      buttons.add(button)
-    },
-  },
-)
-
 export const buttons = new (class ButtonCollection extends discord.Collection<
   string,
   IButton
@@ -200,3 +183,11 @@ export type ButtonSystemInteraction =
   discord.ButtonInteraction<discord.CacheType> & {
     triggerCooldown: () => void
   }
+
+export const buttonHandler = util.createHandler<Button>({
+  directory: "buttons",
+  expectedClass: Button,
+  onLoad: (filepath, button) => {
+    buttons.add(button)
+  },
+})

@@ -108,10 +108,7 @@ export class ModuleHandler {
         withFileTypes: true,
       })
 
-      const files = entries.filter(
-        (e) =>
-          e.isFile() && /\.[tj]s$/.test(e.name) && !e.name.endsWith(".d.ts"),
-      )
+      const files = entries.filter(util.isTsFileEntry)
 
       for (const file of files) {
         const filepath = path.join(base, file.name)

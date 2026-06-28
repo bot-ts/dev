@@ -14,20 +14,6 @@ export class CRON_Error extends Error {
   }
 }
 
-export const cronHandler = new handler.Handler<Cron>(util.srcPath("cron"), {
-  pattern: /\.[tj]s$/,
-  loader: async (filepath) => {
-    const file = await import(url.pathToFileURL(filepath).href)
-    if (file.default instanceof Cron) return file.default
-    throw new CRON_Error(`${filepath}: default export must be a Cron instance`)
-  },
-  onLoad: async (filepath, button) => {
-    button.native = /.native.[jt]s$/.test(filepath)
-    button.filepath = filepath
-    cronList.add(button)
-  },
-})
-
 export const cronList = new (class CronCollection extends discord.Collection<
   string,
   Cron
@@ -228,3 +214,11 @@ export function cronSimpleToPattern(simple: CronIntervalSimple): string {
       throw new CRON_Error("Invalid cron simple type")
   }
 }
+
+export const cronHandler = util.createHandler<Cron>({
+  directory: "cron",
+  expectedClass: Cron,
+  onLoad: (filepath, cron) => {
+    cronList.add(cron)
+  },
+})

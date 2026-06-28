@@ -14,6 +14,7 @@ import * as discord from "discord.js"
 import type v10 from "discord-api-types/v10"
 import * as discordEval from "discord-eval.ts"
 import simpleGit from "simple-git"
+import * as handler from "@ghom/handler"
 import type { PackageJson } from "types-package-json"
 
 import config from "#config"
@@ -734,4 +735,43 @@ export async function checkCooldown(
       )
     }
   }
+}
+
+export const tsFilePattern = /\.[jt]s$/
+
+export function isTsFile(filename: string): boolean {
+  return tsFilePattern.test(filename) && !filename.endsWith(".d.ts")
+}
+
+export function isTsFileEntry(entry: fs.Dirent): boolean {
+  return entry.isFile() && isTsFile(entry.name)
+}
+
+export interface HandlerOptions<T> {
+  directory: string
+  expectedClass: any
+  onLoad?: (filepath: string, element: T) => void | Promise<void>
+}
+
+export function createHandler<T>(
+  options: HandlerOptions<T>
+): handler.Handler<T> {
+  const className = options.expectedClass.name
+
+  return new handler.Handler<T>(srcPath(options.directory), {
+    pattern: tsFilePattern,
+    loader: async (filepath) => {
+      const file = await import(url.pathToFileURL(filepath).href)
+      if (file.default instanceof options.expectedClass) return file.default
+      throw new Error(`${filepath}: default export must be a ${className} instance`)
+    },
+    onLoad: async (filepath, element) => {
+      const el = element as any
+      el.native = /.native.[jt]s$/.test(filepath)
+      el.filepath = filepath
+      if (options.onLoad) {
+        await options.onLoad(filepath, element)
+      }
+    },
+  })
 }

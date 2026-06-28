@@ -20,25 +20,6 @@ export class SlashCommandError extends Error {
   }
 }
 
-export const slashCommandHandler = new handler.Handler<ISlashCommand>(
-  util.srcPath("slash"),
-  {
-    pattern: /\.[tj]s$/,
-    loader: async (filepath) => {
-      const file = await import(url.pathToFileURL(filepath).href)
-      if (file.default instanceof SlashCommand) return file.default
-      throw new Error(
-        `${filepath}: default export must be a SlashCommand instance`,
-      )
-    },
-    onLoad: async (filepath, command) => {
-      command.native = /.native.[jt]s$/.test(filepath)
-      command.filepath = filepath
-      return slashCommands.add(command)
-    },
-  },
-)
-
 export const slashCommands = new (class extends discord.Collection<
   string,
   ISlashCommand
@@ -343,3 +324,11 @@ export function debugSlashCommandBuilder(
     }
   }
 }
+
+export const slashCommandHandler = util.createHandler<ISlashCommand>({
+  directory: "slash",
+  expectedClass: SlashCommand,
+  onLoad: (filepath, command) => {
+    slashCommands.add(command)
+  },
+})

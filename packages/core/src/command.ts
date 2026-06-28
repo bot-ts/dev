@@ -16,23 +16,6 @@ import * as util from "#core/util"
 
 const __filename = util.getCurrentFilename(import.meta)
 
-export const commandHandler = new handler.Handler<ICommand>(
-  util.srcPath("commands"),
-  {
-    pattern: /\.[tj]s$/,
-    loader: async (filepath) => {
-      const file = await import(url.pathToFileURL(filepath).href)
-      if (file.default instanceof Command) return file.default
-      throw new Error(`${filepath}: default export must be a Command instance`)
-    },
-    onLoad: async (filepath, command) => {
-      command.native = /.native.[jt]s$/.test(filepath)
-      command.filepath = filepath
-      return commands.add(command)
-    },
-  },
-)
-
 export let defaultCommand: ICommand | null = null
 
 export const commands = new (class CommandCollection extends discord.Collection<
@@ -990,3 +973,11 @@ export function isDirectMessage<
 >(message: Base): message is Base & DirectMessage {
   return !!message.channel && message.channel.type === discord.ChannelType.DM
 }
+
+export const commandHandler = util.createHandler<Command>({
+  directory: "commands",
+  expectedClass: Command,
+  onLoad: (filepath, command) => {
+    commands.add(command)
+  },
+})
