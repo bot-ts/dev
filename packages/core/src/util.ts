@@ -788,7 +788,9 @@ export function createHandler<T>(
     pattern: tsFilePattern,
     hotReload: env.BOT_MODE === "development",
     loader: async (filepath) => {
-      const file = await import(url.pathToFileURL(filepath).href)
+      const isDev = env.BOT_MODE === "development"
+      const fileUrl = url.pathToFileURL(filepath).href + (isDev ? `?update=${Date.now()}` : "")
+      const file = await import(fileUrl)
       if (file.default instanceof options.expectedClass) return file.default
       throw new Error(
         `${filepath}: default export must be a ${className} instance`,
