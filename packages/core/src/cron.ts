@@ -1,7 +1,4 @@
-import url from "node:url"
 import { styleText } from "node:util"
-import * as handler from "@ghom/handler"
-import * as discord from "discord.js"
 import cron from "node-cron"
 import env from "#core/env"
 import logger from "#core/logger"
@@ -14,31 +11,32 @@ export class CRON_Error extends Error {
   }
 }
 
-export const cronList = new (class CronCollection extends util.ElementCollection<Cron> {
-  constructor() {
-    super("Cron")
-  }
+export const cronList =
+  new (class CronCollection extends util.ElementCollection<Cron> {
+    constructor() {
+      super("Cron")
+    }
 
-  override validate(cron: Cron): void | never {
-    super.validate(cron)
+    override validate(cron: Cron): void | never {
+      super.validate(cron)
 
-    // cron has good format
-    cronConfigToPattern(cron.options.schedule)
+      // cron has good format
+      cronConfigToPattern(cron.options.schedule)
 
-    Object.defineProperty(cron.options.run, "name", {
-      value: util.generateDebugName({
-        name: cron.options.name,
-        type: "cron",
-      }),
-    })
+      Object.defineProperty(cron.options.run, "name", {
+        value: util.generateDebugName({
+          name: cron.options.name,
+          type: "cron",
+        }),
+      })
 
-    logger.log(
-      `loaded cron ${styleText("blueBright", cron.options.name)}${
-        cron.native ? ` ${styleText("green", "native")}` : ""
-      } ${styleText("grey", cron.options.description)}`,
-    )
-  }
-})()
+      logger.log(
+        `loaded cron ${styleText("blueBright", cron.options.name)}${
+          cron.native ? ` ${styleText("green", "native")}` : ""
+        } ${styleText("grey", cron.options.description)}`,
+      )
+    }
+  })()
 
 export interface CronOptions {
   name: string
@@ -215,10 +213,10 @@ export function cronSimpleToPattern(simple: CronIntervalSimple): string {
 export const cronHandler = util.createHandler<Cron>({
   directory: "cron",
   expectedClass: Cron,
-  onLoad: (filepath, cron) => {
+  onLoad: (_filepath, cron) => {
     cronList.add(cron)
   },
-  onRemove: (filepath, cron) => {
+  onRemove: (_filepath, cron) => {
     cron.stop()
     cronList.delete(cron.options.name)
   },

@@ -1,9 +1,7 @@
 // system file, please don't modify it
 
 import path from "node:path"
-import url from "node:url"
 import { styleText } from "node:util"
-import * as handler from "@ghom/handler"
 import * as discord from "discord.js"
 import type apiTypes from "discord-api-types/v10"
 import client from "#core/client"
@@ -16,7 +14,10 @@ const readyListeners = new discord.Collection<
 >()
 
 const loadedListenerFilepaths = new Set<string>()
-const boundListeners = new Map<string, { event: string, once: boolean, wrapper: (...args: any[]) => any }>()
+const boundListeners = new Map<
+  string,
+  { event: string; once: boolean; wrapper: (...args: any[]) => any }
+>()
 
 export interface MoreClientEvents {
   raw: [packet: apiTypes.GatewayDispatchPayload]
@@ -106,7 +107,7 @@ export const listenerHandler = util.createHandler<Listener<any>>({
       } ${styleText("grey", listener.options.description)}`,
     )
   },
-  onRemove: async (filepath, listener) => {
+  onRemove: async (filepath, _listener) => {
     const bound = boundListeners.get(filepath)
     if (bound) {
       client.off(bound.event, bound.wrapper)

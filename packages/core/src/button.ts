@@ -1,39 +1,38 @@
-import url from "node:url"
 import { styleText } from "node:util"
-import * as handler from "@ghom/handler"
 import * as discord from "discord.js"
 import env from "#core/env"
 import * as logger from "#core/logger"
 import * as util from "#core/util"
 
-export const buttons = new (class ButtonCollection extends util.ElementCollection<IButton> {
-  constructor() {
-    super("Button")
-  }
+export const buttons =
+  new (class ButtonCollection extends util.ElementCollection<IButton> {
+    constructor() {
+      super("Button")
+    }
 
-  override validate(button: IButton): void | never {
-    super.validate(button)
+    override validate(button: IButton): void | never {
+      super.validate(button)
 
-    util.validateCooldown(
-      button.options.cooldown,
-      button.options.run,
-      button.options.name,
-    )
+      util.validateCooldown(
+        button.options.cooldown,
+        button.options.run,
+        button.options.name,
+      )
 
-    Object.defineProperty(button.options.run, "name", {
-      value: util.generateDebugName({
-        name: button.options.name,
-        type: "button",
-      }),
-    })
+      Object.defineProperty(button.options.run, "name", {
+        value: util.generateDebugName({
+          name: button.options.name,
+          type: "button",
+        }),
+      })
 
-    logger.log(
-      `loaded button ${styleText("blueBright", button.options.name)}${
-        button.native ? ` ${styleText("green", "native")}` : ""
-      } ${styleText("grey", button.options.description)}`,
-    )
-  }
-})()
+      logger.log(
+        `loaded button ${styleText("blueBright", button.options.name)}${
+          button.native ? ` ${styleText("green", "native")}` : ""
+        } ${styleText("grey", button.options.description)}`,
+      )
+    }
+  })()
 
 export interface IButton {
   options: {
@@ -180,10 +179,10 @@ export type ButtonSystemInteraction =
 export const buttonHandler = util.createHandler<Button>({
   directory: "buttons",
   expectedClass: Button,
-  onLoad: (filepath, button) => {
+  onLoad: (_filepath, button) => {
     buttons.add(button)
   },
-  onRemove: (filepath, button) => {
+  onRemove: (_filepath, button) => {
     buttons.delete(button.options.name)
   },
 })

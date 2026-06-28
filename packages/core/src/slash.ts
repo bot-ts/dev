@@ -1,9 +1,4 @@
-// system file, please don't modify it
-
-import url from "node:url"
 import { styleText } from "node:util"
-
-import * as handler from "@ghom/handler"
 import * as discord from "discord.js"
 import config from "#config"
 import * as command from "#core/command"
@@ -20,16 +15,17 @@ export class SlashCommandError extends Error {
   }
 }
 
-export const slashCommands = new (class extends util.ElementCollection<ISlashCommand> {
-  constructor() {
-    super("SlashCommand")
-  }
+export const slashCommands =
+  new (class extends util.ElementCollection<ISlashCommand> {
+    constructor() {
+      super("SlashCommand")
+    }
 
-  override validate(command: ISlashCommand) {
-    super.validate(command)
-    validateSlashCommand(command)
-  }
-})()
+    override validate(command: ISlashCommand) {
+      super.validate(command)
+      validateSlashCommand(command)
+    }
+  })()
 
 export type SlashCommandChannelType = "guild" | "dm" | "thread"
 
@@ -328,10 +324,10 @@ export function debugSlashCommandBuilder(
 export const slashCommandHandler = util.createHandler<ISlashCommand>({
   directory: "slash",
   expectedClass: SlashCommand,
-  onLoad: (filepath, command) => {
+  onLoad: (_filepath, command) => {
     slashCommands.add(command)
   },
-  onRemove: (filepath, command) => {
+  onRemove: (_filepath, command) => {
     slashCommands.delete(command.options.name)
   },
 })

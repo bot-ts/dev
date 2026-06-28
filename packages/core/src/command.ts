@@ -1,9 +1,7 @@
 // system file, please don't modify it
 
 import path from "node:path"
-import url from "node:url"
 import { styleText } from "node:util"
-import * as handler from "@ghom/handler"
 import * as discord from "discord.js"
 import * as discordEval from "discord-eval.ts"
 import tims from "tims"
@@ -18,26 +16,27 @@ const __filename = util.getCurrentFilename(import.meta)
 
 export let defaultCommand: ICommand | null = null
 
-export const commands = new (class CommandCollection extends util.ElementCollection<ICommand> {
-  constructor() {
-    super("Command")
-  }
-
-  public resolve(key: string): ICommand | undefined {
-    for (const [name, command] of this) {
-      if (
-        key === name ||
-        command.options.aliases?.some((alias) => key === alias)
-      )
-        return command
+export const commands =
+  new (class CommandCollection extends util.ElementCollection<ICommand> {
+    constructor() {
+      super("Command")
     }
-  }
 
-  override validate(command: ICommand) {
-    super.validate(command)
-    validateCommand(command)
-  }
-})()
+    public resolve(key: string): ICommand | undefined {
+      for (const [name, command] of this) {
+        if (
+          key === name ||
+          command.options.aliases?.some((alias) => key === alias)
+        )
+          return command
+      }
+    }
+
+    override validate(command: ICommand) {
+      super.validate(command)
+      validateCommand(command)
+    }
+  })()
 
 export type MessageArguments<
   RestName extends string = string,
@@ -977,10 +976,10 @@ export function isDirectMessage<
 export const commandHandler = util.createHandler<Command>({
   directory: "commands",
   expectedClass: Command,
-  onLoad: (filepath, command) => {
+  onLoad: (_filepath, command) => {
     commands.add(command)
   },
-  onRemove: (filepath, command) => {
+  onRemove: (_filepath, command) => {
     commands.delete(command.options.name)
   },
 })

@@ -5,6 +5,7 @@ import fs from "node:fs"
 import path from "node:path"
 import url from "node:url"
 import util from "node:util"
+import * as handler from "@ghom/handler"
 import dayjs from "dayjs"
 import relative from "dayjs/plugin/relativeTime.js"
 import timezone from "dayjs/plugin/timezone.js"
@@ -14,7 +15,6 @@ import * as discord from "discord.js"
 import type v10 from "discord-api-types/v10"
 import * as discordEval from "discord-eval.ts"
 import simpleGit from "simple-git"
-import * as handler from "@ghom/handler"
 import type { PackageJson } from "types-package-json"
 
 import config from "#config"
@@ -790,7 +790,9 @@ export function createHandler<T>(
     loader: async (filepath) => {
       const file = await import(url.pathToFileURL(filepath).href)
       if (file.default instanceof options.expectedClass) return file.default
-      throw new Error(`${filepath}: default export must be a ${className} instance`)
+      throw new Error(
+        `${filepath}: default export must be a ${className} instance`,
+      )
     },
     onLoad: async (filepath, element) => {
       const el = element as any
