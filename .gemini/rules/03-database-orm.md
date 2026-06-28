@@ -1,0 +1,48 @@
+# Domain 3: Database & ORM
+
+The monorepo uses `@ghom/orm` as its built-in database ORM.
+
+## 1. Late-Binding Connections
+To allow system packages to safely register table directories during bootstrapping before a connection is established, the ORM supports late-binding configuration.
+
+* The core system exports an un-connected `database` ORM client:
+  ```typescript
+  import * as orm from "@ghom/orm"
+  export const database = new orm.ORM(false)
+  ```
+* At runtime, the host project imports this instance and binds its specific SQL client, connection credentials, and table paths:
+  ```typescript
+  import { database } from "@ghom/bot.ts-core"
+
+  database.connect({
+    tableLocation: util.srcPath("tables"),
+    database: {
+      client: "sqlite3",
+      connection: { filename: "./data/sqlite3.db" }
+    }
+  })
+  ```
+
+## 2. Table Definitions & Migrations
+All tables must extend the `Table` class from `@ghom/orm` and declare their fields using the `columns` callback:
+
+```typescript
+import { Table, col, migrate } from "@ghom/orm"
+
+export default new Table({
+  name: "users",
+  description: "Bot users database",
+  columns: (col) => ({
+    id: col.increments(),
+    username: col.string().unique(),
+    score: col.integer().defaultTo(0),
+  }),
+  migrations: {
+    1: migrate.addColumn("is_premium", col.boolean().defaultTo(false)),
+  },
+})
+```
+
+### Querying the DB:
+* Query Knex directly via `Table.query`: `const user = await usersTable.query.where("id", 1).first()`
+* Use built-in cache via `Table.cache`: `const cachedUser = await usersTable.cache.get("user:1", (q) => q.where("id", 1))`

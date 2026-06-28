@@ -1,0 +1,26 @@
+# Domain 6: The Client Bot Template Paradigm
+
+`apps/framework` is not just another monorepo package; it is a **client-facing project template skeleton** (published under `@ghom/bot.ts`). It represents a paradigm shift in how bots are designed and initialized.
+
+## 1. Engine & Package Manager Agnosticism
+A bot.ts template project can run on any modern JS runtime (**Node.js**, **Bun**, or **Deno**) and use any package manager (**npm**, **yarn**, **pnpm**, or **bun**).
+
+### How it is configured:
+- The selections are made by the user when running `bot new`.
+- The selections are stored inside the project's local `.env` under `RUNTIME` and `PACKAGE_MANAGER`.
+- The CLI compiles these parameters dynamically using `compatibility.json` and updates the `package.json` scripts!
+
+## 2. Dynamic Script Generation (`compatibility.json`)
+All package.json scripts inside the bot are dynamically generated from the central registry `compatibility.json`.
+
+* Under no circumstances should you hardcode package managers (like `npm`, `pnpm`, or `bun`) or runner commands (like `npx` or `bunx`) inside the README or scripts.
+* Use the CLI's `resolveCommand` helper function which parses placeholders (`{run}`, `{exec}`, `{install}`) dynamically from `compatibility.json` based on the chosen package manager and engine:
+  - `{install}` -> `bun install` or `npm install`
+  - `{run} start` -> `bun run start` or `npm run start`
+  - `{exec} bot` -> `bunx bot` or `npx bot`
+
+## 3. Custom Modules & Exotic Installation
+- Modules are designed to be published as clean NPM packages (using standard `src/` folder layouts and TSConfigs).
+- However, local bots scan modules flat directly under `src/modules/<name>/`.
+- The CLI (`bot module install`) automates this "exotic installation" under the hood by downloading, untarring, and extracting only the `src/` directory contents flat into the local project structure without ever polluting the host bot's `node_modules` or running a package install inside the bot!
+- Therefore, custom modules must never be installed via `npm install` or `bun install` on the host bot. They must only be installed via `bot module install`!

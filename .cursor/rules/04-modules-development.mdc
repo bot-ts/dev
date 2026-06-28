@@ -1,0 +1,48 @@
+---
+description: Custom module publishing layout, local installation flattening, and CLI modules management.
+globs: ["packages/modules/**/*.ts", "packages/cli/src/cmd/module/*.ts"]
+alwaysApply: true
+---
+# Domain 4: Custom Modules Development
+
+To keep development clean while ensuring perfect compatibility with the framework's simple module scanner, we enforce a **dual-layout** convention for custom modules.
+
+## 1. Development & Publishing Layout (Clean package)
+When a custom module is developed or published to NPM, it follows a standard compile-safe package structure. All code/component folders (`commands/`, `slash/`, etc.) reside inside a `src/` directory, and it contains its own `tsconfig.json` extending the main project configuration:
+
+```
+packages/modules/my-module/ (published npm package root)
+├── package.json         # Package configuration for NPM publishing
+├── module.json          # Module metadata for the bot.ts framework
+├── tsconfig.json        # TypeScript configuration extending ../../../tsconfig.json
+├── README.md            # Documentation
+└── src/                 # Development source folder
+    ├── commands/        # Module commands (optional)
+    ├── slash/           # Module slash commands (optional)
+    └── namespaces/      # Module namespaces/helpers (optional)
+```
+
+## 2. Installation Layout (Flat local directory)
+When a developer runs `bot module install <packageName>`, the CLI automatically **unpacks the published `src/` directory directly into the local module root** (`src/modules/<name>/`). 
+
+This keeps the local installed module flat and fully compliant with the framework's simple module scanner:
+
+```
+src/modules/my-module/ (local installed module root)
+├── package.json         # Copied to local root (contains version and dependencies)
+├── module.json          # Copied to local root (contains manifest metadata)
+├── README.md            # Copied to local root (documentation)
+├── commands/            # Extracted directly from package/src/commands/
+├── slash/               # Extracted directly from package/src/slash/
+└── namespaces/          # Extracted directly from package/src/namespaces/
+```
+
+### The `unpackNpmModule` Helper:
+When writing or refactoring CLI commands for installing or updating modules, **always** use the unified `unpackNpmModule` helper function from `#src/util` to automate this extraction and mapping cleanly:
+
+```typescript
+import { unpackNpmModule } from "#src/util"
+
+unpackNpmModule(packageName, version, destPath)
+```
+This is fully cross-platform and handles downloading, untarring, and flat extraction safely under the hood.

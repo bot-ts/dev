@@ -1,0 +1,27 @@
+# Domain 2: TypeScript & Code Style
+
+This project adheres to strict formatting, linting, and modern ESM-compatible code conventions.
+
+## 1. Biome Formatting & Style
+Always format your changes with **Biome** before committing.
+* **Indentation**: Tabs (not spaces).
+* **Quotes**: Double quotes `""` for strings.
+* **Semicolons**: None (no-semi).
+* **Command**: Run `bun run format` to automatically apply style and lint corrections across the workspace.
+
+## 2. No `"any"` Bypass — Use Strict Typings
+* The `"no-explicit-any"` rule is strictly enforced. You are forbidden from using `"any"` shortcuts for unresolved types.
+* To safely and cleanly derive type definitions from third-party packages, use TypeScript's **`ReturnType`** utility:
+  * **Yargs Parser Arguments**: Use `parsedArgs: ReturnType<typeof yargsParser>` instead of custom/loose object types.
+  * **Node Cron Scheduled Task**: Use `task?: ReturnType<typeof cron.schedule>` to represent a scheduled job.
+
+## 3. ESM Hoisting in Unit Tests (`BOT_MODE=test`)
+* In ES Modules (`"type": "module"`), static `import` statements are hoisted and executed **before** any other synchronous code in the file.
+* To successfully bypass `.env` checks during headless unit test executions on the CI, you **MUST** set the test mode first and then import the system core **dynamically**:
+  ```typescript
+  /*global process*/
+  process.env.BOT_MODE = "test"
+
+  const core = await import("#all")
+  ```
+* Include an empty `export {}` at the bottom of the test script to satisfy TypeScript that the file is indeed an ES module and supports top-level await.

@@ -1,0 +1,19 @@
+{
+  "customCommands": [
+    {
+      "name": "format",
+      "description": "Formats and lints all workspace packages with Biome",
+      "command": "bun run format"
+    },
+    {
+      "name": "check",
+      "description": "Runs typechecking (tsc --noEmit) on all packages",
+      "command": "bunx turbo check"
+    },
+    {
+      "name": "test",
+      "description": "Runs the full test suite (unit tests and bootstrap tests)",
+      "command": "bun run test"
+    }
+  ]
+}

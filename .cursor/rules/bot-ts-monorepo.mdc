@@ -1,0 +1,16 @@
+---
+description: Custom instructions and guardrails for editing the bot.ts monorepo codebase.
+globs: **/*.ts, **/*.json, **/*.md, **/*.mjs
+---
+# bot.ts Monorepo Developer Rules & Guardrails
+
+Always follow the instructions in the root `CLAUDE.md` and `GEMINI.md`.
+
+## Core Guidelines
+- **Zero any-types**: Never use `any` bypasses. Derive types with `ReturnType<typeof functionName>` from external packages.
+- **ESM Hoisting in Tests**: Use dynamic imports (`await import(...)`) inside `src/index.test.ts` to ensure `process.env.BOT_MODE` is set before loading system modules.
+- **Path Resolution**: Never use `import.meta` for project configuration file paths; always resolve paths using `process.cwd()` to dynamically target the host project's files.
+- **NPM Modules src/ Convention**:
+  - Published modules store code files inside a development `src/` directory.
+  - Installed local modules copy files directly under `src/modules/<name>/` root (flat layout).
+  - Use `unpackNpmModule` in the CLI to cleanly automate this unpacking.

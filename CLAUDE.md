@@ -1,0 +1,59 @@
+# Claude AI Assistant Instructions — bot.ts Monorepo Root
+
+Welcome to the **bot.ts** monorepo! This file serves as a foundational guide for any AI assistant (including Claude Code) to understand the codebase structure, architectural rules, development workflows, and constraints.
+
+---
+
+## 1. Monorepo Architecture Overview
+
+This project is a monorepo containing multiple applications, system packages, and official modules. It is managed using **Bun workspaces** (configured in the root `package.json`).
+
+```
+bot.ts/ (monorepo root)
+├── apps/               # Executable applications & templates
+│   ├── framework/      # @ghom/bot.ts — The client bot template (copied by "bot new")
+│   ├── admin/          # Next.js admin portal/dashboard for bots
+│   ├── website/        # Next.js main landing page
+│   └── docs/           # GitBook documentation
+├── packages/           # System-wide packages
+│   ├── core/           # @ghom/bot.ts-core — System core extracted from framework
+│   ├── cli/            # @ghom/bot.ts-cli — The project CLI manager tool
+│   ├── orm/            # @ghom/orm — Knex-based typed ORM with late-binding
+│   ├── query/          # @ghom/query — Caching, debouncing, throttlers, and circuit breakers
+│   ├── logger/         # @ghom/logger — Standard logging subsystem
+│   ├── handler/        # @ghom/handler — File directory loader with lifecycle hooks
+│   └── event-emitter/  # @ghom/event-emitter — Light and fast event emitter
+└── packages/modules/   # Official publishable NPM modules
+    └── ai-assistant/   # @ghom/bot.ts-module-ai-assistant — AI-powered bot manager
+```
+
+---
+
+## 2. Deep Dive: Apps & Packages
+
+For detailed constraints, rules, and style guides, please refer to the specific rule domains inside **`.claude/rules/`**:
+
+1. **`01-monorepo-architecture.md`** : Topography of Bun workspaces, dependencies, and monorepo relationships.
+2. **`02-typescript-style.md`** : Linting Biome, strict typing, ESM, hoisting in tests, no `"any"` bypasses, `ReturnType<>` usage.
+3. **`03-database-orm.md`** : Late-binding connections on `database` instance, knex configurations, migrations.
+4. **`04-modules-development.md`** : Custom modules creation/publishing convention (`src/` folder layout vs flat local), `unpackNpmModule`.
+5. **`05-bot-components.md`** : Unified handler creation via `createHandler` factory, commands, listeners, buttons, crons.
+6. **`06-framework-template.md`** : The paradigm shift of `apps/framework` as a package-agnostic, runtime-agnostic client template managed exclusively via the CLI.
+
+---
+
+## 3. Custom Commands (Claude Code)
+
+This monorepo supports custom slash commands configured via `.claude.json` to make running standard tasks easier:
+
+* `/format` : Formats and lints all workspace packages with Biome.
+* `/check` : Runs typechecking (`tsc --noEmit`) on all packages.
+* `/test` : Runs the full test suite (unit tests and bootstrap tests).
+
+---
+
+## 4. Key Developer Workflows
+
+* **Format**: `bun run format`
+* **Typecheck**: `bunx turbo check`
+* **Test**: `bun run test`
