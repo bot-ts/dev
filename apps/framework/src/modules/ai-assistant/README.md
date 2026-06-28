@@ -81,8 +81,23 @@ Send a direct message to the bot. The AI maintains a conversation history per us
 |---|---|---|
 | `bash` | Execute a shell command on the server | Yes |
 | `sql` | Run a raw SQL query on the database | Yes |
-| `discord_guild_info` | Get guild/channel/role information | No |
+| `discord_guild_info` | Get guild/channel/role list information | No |
 | `discord_send` | Send a message to a channel | No |
+| `discord_get_user_info` | Get detailed user information by ID | No |
+| `discord_list_channels` | List all channels (text, voice, category) in a guild | No |
+| `discord_list_roles` | List all roles in a guild with permissions | No |
+| `discord_list_members` | List or search members in a guild with query support | No |
+| `discord_get_channel_info`| Get detailed settings, topic, type, and permission overwrites of a channel | No |
+| `discord_get_role_info` | Get detailed settings, hoist, position, and permission names of a role | No |
+| `discord_create_channel`| Create a text, voice, or category channel in a guild | Yes |
+| `discord_delete_channel`| Delete a channel by ID | Yes |
+| `discord_edit_channel` | Edit channel settings, topic, NSFW, slowmode, parent category, or permission overwrites | Yes |
+| `discord_manage_role` | Create, delete, assign, or remove roles in a guild | Yes |
+| `discord_edit_role` | Edit role settings, color, hoist, mentionable status, or permissions | Yes |
+| `discord_kick_member` | Kick a member from a guild | Yes |
+| `discord_ban_member` | Ban a member from a guild | Yes |
+| `discord_unban_member` | Unban a user from a guild | Yes |
+| `discord_edit_guild` | Edit general server name, verification, explicit content filter, system channel | Yes |
 | `ask_user` | Ask the bot owner a follow-up question | No |
 
 ## Disabling

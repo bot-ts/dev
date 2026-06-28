@@ -6,7 +6,19 @@ import aiConfirmButton from "#modules/ai-assistant/buttons/ai-confirm"
 import * as llm from "#modules/ai-assistant/namespaces/llm"
 import * as procedures from "#modules/ai-assistant/namespaces/procedures"
 
-const DANGEROUS_TOOLS = new Set(["bash", "sql"])
+const DANGEROUS_TOOLS = new Set([
+  "bash",
+  "sql",
+  "discord_create_channel",
+  "discord_delete_channel",
+  "discord_manage_role",
+  "discord_kick_member",
+  "discord_ban_member",
+  "discord_unban_member",
+  "discord_edit_channel",
+  "discord_edit_role",
+  "discord_edit_guild",
+])
 
 const SYSTEM_PROMPT = `You are an AI assistant integrated into a Discord bot built with bot.ts framework.
 You help the bot owner manage their bot, server, and database.
@@ -16,11 +28,26 @@ Available capabilities:
 - Run SQL queries on the bot's database (sql)
 - Get Discord guild information (discord_guild_info)
 - Send messages to Discord channels (discord_send)
+- Get detailed Discord user information (discord_get_user_info)
+- List all channels in a guild (discord_list_channels)
+- List all roles in a guild (discord_list_roles)
+- List or search members in a guild (discord_list_members)
+- Get detailed channel settings and permissions (discord_get_channel_info)
+- Get detailed role settings and permissions (discord_get_role_info)
+- Create text, voice, or category channels (discord_create_channel)
+- Delete channels (discord_delete_channel)
+- Edit channel settings and permission overwrites (discord_edit_channel)
+- Create, delete, assign, or remove roles (discord_manage_role)
+- Edit role settings and global permissions (discord_edit_role)
+- Kick members from a guild (discord_kick_member)
+- Ban members from a guild (discord_ban_member)
+- Unban members from a guild (discord_unban_member)
+- Edit general Discord server/guild settings (discord_edit_guild)
 - Ask the user for clarification (ask_user)
 
 Rules:
 - Be concise in your responses.
-- For dangerous operations (bash, sql), explain what you're about to do.
+- For dangerous operations (bash, sql, and mutating Discord API actions), explain what you're about to do.
 - Always prefer read operations before write operations.
 - Never execute destructive commands without confirming the intent.`
 
@@ -83,10 +110,14 @@ async function handleDangerousTool(
   name: string,
   args: Record<string, unknown>,
 ): Promise<string> {
-  const preview =
-    name === "bash"
-      ? `\`\`\`sh\n${args.command}\n\`\`\``
-      : `\`\`\`sql\n${args.query}\n\`\`\``
+  let preview = ""
+  if (name === "bash") {
+    preview = `\`\`\`sh\n${args.command}\n\`\`\``
+  } else if (name === "sql") {
+    preview = `\`\`\`sql\n${args.query}\n\`\`\``
+  } else {
+    preview = `\`\`\`json\n${JSON.stringify(args, null, 2)}\n\`\`\``
+  }
 
   const { actionId, promise } = procedures.createPendingAction(name, args)
 
