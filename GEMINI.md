@@ -33,12 +33,12 @@ bot.ts/ (monorepo root)
 
 For detailed constraints, rules, and style guides, please refer to the specific rule domains inside **`.gemini/rules/`**:
 
-1. **`01-monorepo-architecture.md`** : Topography of Bun workspaces, dependencies, and monorepo relationships.
-2. **`02-typescript-style.md`** : Linting Biome, strict typing, ESM, hoisting in tests, no `"any"` bypasses, `ReturnType<>` usage.
-3. **`03-database-orm.md`** : Late-binding connections on `database` instance, knex configurations, migrations.
-4. **`04-modules-development.md`** : Custom modules creation/publishing convention (`src/` folder layout vs flat local), `unpackNpmModule`.
-5. **`05-bot-components.md`** : Unified handler creation via `createHandler` factory, commands, listeners, buttons, crons.
-6. **`06-framework-template.md`** : The paradigm shift of `apps/framework` as a package-agnostic, runtime-agnostic client template managed exclusively via the CLI.
+1. **[01-monorepo-architecture.md](.gemini/rules/01-monorepo-architecture.md)** : Topography of Bun workspaces, dependencies, and monorepo relationships.
+2. **[02-typescript-style.md](.gemini/rules/02-typescript-style.md)** : Linting Biome, strict typing, ESM, hoisting in tests, no `"any"` bypasses, `ReturnType<>` usage.
+3. **[03-database-orm.md](.gemini/rules/03-database-orm.md)** : Late-binding connections on `database` instance, knex configurations, migrations.
+4. **[04-modules-development.md](.gemini/rules/04-modules-development.md)** : Custom modules creation/publishing convention (`src/` folder layout vs flat local), `unpackNpmModule`.
+5. **[05-bot-components.md](.gemini/rules/05-bot-components.md)** : Unified handler creation via `createHandler` factory, commands, listeners, buttons, crons.
+6. **[06-framework-template.md](.gemini/rules/06-framework-template.md)** : The paradigm shift of `apps/framework` as a package-agnostic, runtime-agnostic client template managed exclusively via the CLI.
 
 ---
 
